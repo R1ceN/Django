@@ -69,10 +69,11 @@
 <body>
 <div class="login-container">
     <h2>ログイン</h2>
-    <form action="login.php" method="post">
+    <form action="{% url 'login' %}" method="post">
+        {% csrf_token %}
         <div class="input-group">
-            <label for="username">ユーザー名:</label>
-            <input type="text" id="username" name="username" required>
+            <label for="empid">ユーザー名:</label>
+            <input type="text" id="empid" name="empid" required>
         </div>
         <div class="input-group">
             <label for="password">パスワード:</label>

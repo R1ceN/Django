@@ -1,26 +1,28 @@
+from django.contrib.auth import authenticate
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login as auth_login
-from django.contrib.auth.decorators import login_required
 from django.urls import reverse
+from .models import Employee
+
 
 def login(request):
     if request.method == 'POST':
-        username = request.POST['username']
+        empid = request.POST['empid']
         password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
+        user = Employee.objects.get(empid=empid)
         if user is not None:
-            auth_login(request, user)
-            if user.role == 'admin':
-                return redirect(reverse('Admin'))
-            elif user.role == 'receptionist':
-                return redirect(reverse('EmployeeReception'))
-            elif user.role == 'doctor':
-                return redirect(reverse('EmployeeDoctor'))
+            print(user.emprole)
+            if user.emprole == 1:  # 管理者
+                return render(request, '管理者.html')
+            elif user.emprole == 2:  # 受付
+                return render(request, '従業員受付.html')
+            elif user.emprole == 3:  # 医師
+                return render(request, '従業員医師.html')
             else:
                 return redirect(reverse('home'))
         else:
             return render(request, 'login.html', {'error': 'Invalid credentials'})
     return render(request, 'login.html')
+
 
 def Admin(request):
     return render(request, '管理者.html')
