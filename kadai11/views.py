@@ -1,5 +1,5 @@
-from django.contrib.auth import authenticate
 from django.shortcuts import render, redirect
+from django.http import HttpResponse
 from django.urls import reverse
 from .models import Employee
 
@@ -28,7 +28,25 @@ def Admin(request):
     return render(request, '管理者.html')
 
 
-def EmployeeRegistration(request):
+def register_employee(request):
+    if request.method == 'POST':
+        empfname = request.POST.get('firstName')
+        emplname = request.POST.get('lastName')
+        email = request.POST.get('email')
+        empid = email.split('@')[0]  # emailの@より前をempidとして使用
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
+        emprole = request.POST.get('role')
+
+        if password != confirm_password:
+            return render(request, '従業員登録.html', {'error': 'Passwords do not match'})
+
+        try:
+            Employee.objects.create(empid=empid, empfname=empfname, emplname=emplname, emppasswd=password, emprole=emprole)
+            return HttpResponse('従業員が登録されました。')
+        except Exception as e:
+            return render(request, '従業員登録.html', {'error': str(e)})
+
     return render(request, '従業員登録.html')
 
 
