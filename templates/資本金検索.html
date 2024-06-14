@@ -60,13 +60,29 @@
     </style>
 </head>
 <body>
-<div class="container">
-    <h2>資本金検索（指定値以上）</h2>
-    <form action="capital_search.php" method="post">
-        <label for="minCapital">最低資本金:</label>
-        <input type="number" id="minCapital" name="minCapital" required>
+<header>
+    <h1>資本金検索</h1>
+</header>
+<main>
+    <form method="post">
+        {% csrf_token %}
+        <label for="capital">資本金:</label>
+        <input type="text" id="capital" name="capital" required>
         <button type="submit">検索</button>
     </form>
-</div>
+
+    {% if suppliers %}
+        <div class="result">
+            <h2>検索結果</h2>
+            <ul>
+                {% for supplier in suppliers %}
+                    <li>{{ supplier.shiiremei }} (資本金: {{ supplier.shihonkin }}円)</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% elif suppliers is not none %}
+        <p>該当する仕入れ先が見つかりませんでした。</p>
+    {% endif %}
+</main>
 </body>
 </html>

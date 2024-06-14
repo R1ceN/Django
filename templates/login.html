@@ -80,6 +80,11 @@
             <input type="password" id="password" name="password" required>
         </div>
         <button type="submit">ログイン</button>
+        <div class="error">
+            {% if error %}
+                <p>{{ error }}</p>
+            {% endif %}
+        </div>
     </form>
 </div>
 </body>

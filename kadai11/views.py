@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.urls import reverse
 from .models import Employee
+from .models import Shiiregyosha
 
 
 def login(request):
@@ -42,7 +43,8 @@ def register_employee(request):
             return render(request, '従業員登録.html', {'error': 'Passwords do not match'})
 
         try:
-            Employee.objects.create(empid=empid, empfname=empfname, emplname=emplname, emppasswd=password, emprole=emprole)
+            Employee.objects.create(empid=empid, empfname=empfname, emplname=emplname, emppasswd=password,
+                                    emprole=emprole)
             return HttpResponse('従業員が登録されました。')
         except Exception as e:
             return render(request, '従業員登録.html', {'error': str(e)})
@@ -50,19 +52,33 @@ def register_employee(request):
     return render(request, '従業員登録.html')
 
 
-def SupplierList(request):
+def supplier_menu(request):
     return render(request, '仕入れ.html')
 
 
-def CapitalSearch(request):
-    return render(request, '資本金検索.html')
+def capital_search(request):
+    suppliers = None
+    if request.method == 'POST':
+        capital = request.POST.get('capital')
+        suppliers = Shiiregyosha.objects.filter(shihonkin=capital)
+    return render(request, '資本金検索.html', {'suppliers': suppliers})
 
 
-def UpdateSupplierPhone(request):
+def update_supplier_phone(request):
+    if request.method == 'POST':
+        supplier_id = request.POST.get('supplier_id')
+        new_phone = request.POST.get('phone')
+        try:
+            supplier = Shiiregyosha.objects.get(shiireid=supplier_id)
+            supplier.shiiretel = new_phone
+            supplier.save()
+            return HttpResponse('電話番号が更新されました。')
+        except Shiiregyosha.DoesNotExist:
+            return HttpResponse('仕入れ先が見つかりませんでした。')
     return render(request, '電話番号変更.html')
 
 
-def EmployeeNameChange(request):
+def employee_name_change(request):
     return render(request, '従業員氏名変更.html')
 
 

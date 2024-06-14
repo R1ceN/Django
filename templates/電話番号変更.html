@@ -61,13 +61,18 @@
     </style>
 </head>
 <body>
-<div class="container">
-    <h2>電話番号変更</h2>
-    <form action="phone_change_process.php" method="post">
-        <label for="new_phone">新しい電話番号:</label>
-        <input type="text" id="new_phone" name="new_phone" required>
+<header>
+    <h1>電話番号変更</h1>
+</header>
+<main>
+    <form method="post">
+        {% csrf_token %}
+        <label for="supplier_id">仕入れ先ID:</label>
+        <input type="text" id="supplier_id" name="supplier_id" required>
+        <label for="phone">新しい電話番号:</label>
+        <input type="text" id="phone" name="phone" required>
         <button type="submit">変更</button>
     </form>
-</div>
+</main>
 </body>
 </html>

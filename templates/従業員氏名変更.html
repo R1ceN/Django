@@ -60,17 +60,18 @@
     </style>
 </head>
 <body>
-<div class="container">
-    <h2>従業員氏名変更</h2>
-    <form action="update_employee_name.php" method="post">
-        <label for="employeeId">従業員ID:</label>
-        <input type="text" id="employeeId" name="employeeId" required>
-        <label for="newFirstName">新しい姓:</label>
-        <input type="text" id="newFirstName" name="newFirstName" required>
-        <label for="newLastName">新しい名:</label>
-        <input type="text" id="newLastName" name="newLastName" required>
+<header>
+    <h1>従業員氏名変更</h1>
+</header>
+<main>
+    <form method="post">
+        {% csrf_token %}
+        <label for="employee_id">従業員ID:</label>
+        <input type="text" id="employee_id" name="employee_id" required>
+        <label for="new_name">新しい氏名:</label>
+        <input type="text" id="new_name" name="new_name" required>
         <button type="submit">変更</button>
     </form>
-</div>
+</main>
 </body>
 </html>
