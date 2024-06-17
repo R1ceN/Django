@@ -109,6 +109,31 @@ def change_employee_name(request):
 
     return render(request, '従業員氏名変更.html')
 
+def add_supplier(request):
+    if request.method == 'POST':
+        shiireid = request.POST.get('shiireid')
+        shiiremei = request.POST.get('shiiremei')
+        shiireaddress = request.POST.get('shiireaddress')
+        shiiretel = request.POST.get('shiiretel')
+        shihonkin = request.POST.get('shihonkin')
+        nouki = request.POST.get('nouki')
+
+        try:
+            Shiiregyosha.objects.create(
+                shiireid=shiireid,
+                shiiremei=shiiremei,
+                shiireaddress=shiireaddress,
+                shiiretel=shiiretel,
+                shihonkin=shihonkin,
+                nouki=nouki
+            )
+            messages.success(request, '仕入先が正常に追加されました。')
+        except Exception as e:
+            messages.error(request, f'仕入先の追加に失敗しました: {str(e)}')
+
+        return redirect('add_supplier')
+
+    return render(request, '仕入れ先追加.html')
 
 def EmployeeReception(request):
     return render(request, '従業員受付.html')
