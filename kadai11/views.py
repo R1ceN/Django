@@ -78,7 +78,29 @@ def update_supplier_phone(request):
     return render(request, '電話番号変更.html')
 
 
-def employee_name_change(request):
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import Employee
+
+
+def change_employee_name(request):
+    if request.method == 'POST':
+        employee_id = request.POST.get('employee_id')
+        new_fname = request.POST.get('new_fname')
+        new_lname = request.POST.get('new_lname')
+
+        try:
+            employee = Employee.objects.get(empid=employee_id)
+            employee.empfname = new_fname
+            employee.emplname = new_lname
+            employee.save()
+            messages.success(request, '従業員の氏名が正常に更新されました。')
+        except Employee.DoesNotExist:
+            messages.error(request, '従業員IDが見つかりません。')
+
+        return redirect('change_employee_name')
+
     return render(request, '従業員氏名変更.html')
 
 
