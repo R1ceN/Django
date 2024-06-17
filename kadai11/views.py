@@ -56,11 +56,17 @@ def supplier_menu(request):
     return render(request, '仕入れ.html')
 
 
-def capital_search(request):
+def search_by_capital(request):
     suppliers = None
     if request.method == 'POST':
         capital = request.POST.get('capital')
-        suppliers = Shiiregyosha.objects.filter(shihonkin=capital)
+        if capital:
+            try:
+                capital_value = int(capital)
+                suppliers = Shiiregyosha.objects.filter(shihonkin__gte=capital_value)
+            except ValueError:
+                suppliers = []
+
     return render(request, '資本金検索.html', {'suppliers': suppliers})
 
 
