@@ -1,5 +1,6 @@
-from django.shortcuts import render, redirect
+from django.contrib import messages
 from django.http import HttpResponse
+from django.shortcuts import render, redirect
 from django.urls import reverse
 from .models import Employee
 from .models import Shiiregyosha
@@ -7,25 +8,33 @@ from .models import Shiiregyosha
 
 def login(request):
     if request.method == 'POST':
-        empid = request.POST['empid']
-        password = request.POST['password']
-        user = Employee.objects.get(empid=empid)
-        if user is not None:
-            print(user.emprole)
-            if user.emprole == 1:  # 管理者
-                return render(request, '管理者.html')
-            elif user.emprole == 2:  # 受付
-                return render(request, '従業員受付.html')
-            elif user.emprole == 3:  # 医師
-                return render(request, '従業員医師.html')
+        empid = request.POST.get('empid')
+        password = request.POST.get('password')
+        if not empid or not password:
+            return render(request, 'login.html', {'error': 'Please enter both Employee ID and Password'})
+
+        try:
+            user = Employee.objects.get(empid=empid)
+            if password == user.emppasswd:  # Direct password comparison (not secure)
+                login(request)
+                if user.emprole == 1:  # 管理者
+                    return render(request, '管理者.html')
+                elif user.emprole == 2:  # 受付
+                    return render(request, '従業員受付.html')
+                elif user.emprole == 3:  # 医師
+                    return render(request, '従業員医師.html')
+                else:
+                    return redirect(reverse('home'))
             else:
-                return redirect(reverse('home'))
-        else:
-            return render(request, 'login.html', {'error': 'Invalid credentials'})
+                return render(request, 'login.html', {'error': 'Invalid credentials'})
+        except Employee.DoesNotExist:
+            return render(request, 'login.html', {'error': 'User does not exist'})
+        except Exception as e:
+            return render(request, 'login.html', {'error': f'An error occurred: {e}'})
     return render(request, 'login.html')
 
 
-def Admin(request):
+def admin(request):
     return render(request, '管理者.html')
 
 
@@ -84,12 +93,6 @@ def update_supplier_phone(request):
     return render(request, '電話番号変更.html')
 
 
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from .models import Employee
-
-
 def change_employee_name(request):
     if request.method == 'POST':
         employee_id = request.POST.get('employee_id')
@@ -108,6 +111,7 @@ def change_employee_name(request):
         return redirect('change_employee_name')
 
     return render(request, '従業員氏名変更.html')
+
 
 def add_supplier(request):
     if request.method == 'POST':
@@ -134,6 +138,7 @@ def add_supplier(request):
         return redirect('add_supplier')
 
     return render(request, '仕入れ先追加.html')
+
 
 def EmployeeReception(request):
     return render(request, '従業員受付.html')
