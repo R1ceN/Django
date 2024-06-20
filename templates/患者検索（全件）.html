@@ -11,19 +11,16 @@
             padding: 0;
             background-color: #f4f4f4;
         }
-
         header {
             background-color: #007bff;
             color: #fff;
             text-align: center;
             padding: 20px 0;
         }
-
         h1 {
             margin: 0;
             font-size: 24px;
         }
-
         main {
             max-width: 600px;
             margin: 20px auto;
@@ -32,36 +29,14 @@
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-
-        form {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        input[type="text"] {
+        table {
             width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
             padding: 8px;
-            margin-bottom: 10px;
             border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-
-        button[type="submit"] {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        button[type="submit"]:hover {
-            background-color: #0056b3;
+            text-align: left;
         }
     </style>
 </head>
@@ -70,15 +45,30 @@
     <h1>患者検索</h1>
 </header>
 <main>
-    <form action="search_patient.php" method="post">
-        <label for="search">検索ワード：</label>
-        <input type="text" id="search" name="search">
-        <button type="submit">検索</button>
-    </form>
-
-    <!-- ここに検索結果を表示する場合のコードを追加 -->
-    <!-- 検索結果がある場合はここに表示する -->
-    <!-- 検索結果がない場合は「該当する患者が見つかりませんでした。」などのメッセージを表示 -->
+    <h2>検索結果</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>名前</th>
+                <th>姓</th>
+                <th>保険証番号</th>
+                <th>有効期限</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for patient in patients %}
+            <tr>
+                <td>{{ patient.patid }}</td>
+                <td>{{ patient.patfname }}</td>
+                <td>{{ patient.patlname }}</td>
+                <td>{{ patient.hokenmei }}</td>
+                <td>{{ patient.hokenexp }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </main>
 </body>
 </html>
+

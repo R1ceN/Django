@@ -173,7 +173,6 @@ def change_password(request):
             else:
                 user.emppasswd = new_password  # パスワードを平文で保存
                 user.save()
-                messages.success(request, 'パスワードが正常に変更されました。')
                 return redirect('employee_reception' if user.emprole == 2 else 'EmployeeDoctor')
         except Employee.DoesNotExist:
             messages.error(request, 'ユーザーが見つかりません。')
@@ -235,7 +234,8 @@ def search_expired_insurance(request):
 
 
 def PatientSearchAll(request):
-    return render(request, '患者検索（全件）.html')
+    patients = Patient.objects.all()
+    return render(request, '患者検索（全件）.html', {'patients': patients})
 
 
 def DrugAdministrationInstructions(request):

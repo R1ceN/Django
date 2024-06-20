@@ -17,7 +17,7 @@ urlpatterns = [
     path('register_patient/', views.register_patient, name='register_patient'),
     path('update_insurance/', views.update_insurance, name='update_insurance'),
     path('search_expired_insurance/', views.search_expired_insurance, name='search_expired_insurance'),
-    path('patientsearchall/', views.PatientSearchAll, name='PatientSearchAll'),
+    path('patient_search_all/', views.PatientSearchAll, name='PatientSearchAll'),
     path('drugadministrationinstructions/', views.DrugAdministrationInstructions,
          name='DrugAdministrationInstructions'),
     path('drugadministrationconfirmed/', views.DrugAdministrationConfirmed, name='DrugAdministrationConfirmed'),
