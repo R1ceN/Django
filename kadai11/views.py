@@ -202,8 +202,27 @@ def register_patient(request):
     return render(request, '患者登録.html')
 
 
-def PatientManagement(request):
-    return render(request, '患者管理.html')
+def update_insurance(request):
+    if request.method == 'POST':
+        patient_id = request.POST.get('patientID')
+        insurance_number = request.POST.get('insuranceNumber')
+        insurance_expiration = request.POST.get('insuranceExpiration')
+
+        try:
+            patient = Patient.objects.get(patid=patient_id)
+            if insurance_number:
+                patient.hokenmei = insurance_number
+            if insurance_expiration:
+                patient.hokenexp = insurance_expiration
+            patient.save()
+            messages.success(request, '保険証情報が正常に更新されました。')
+            return redirect('update_insurance')
+        except Patient.DoesNotExist:
+            messages.error(request, '患者が見つかりません。')
+        except Exception as e:
+            messages.error(request, f'保険証情報の更新に失敗しました: {e}')
+
+    return render(request, '患者保険証変更.html')
 
 
 def PatientSearchExpired(request):

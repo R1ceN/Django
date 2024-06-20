@@ -97,18 +97,19 @@
 <main>
     <div class="form-container">
         <h2>保険証情報変更</h2>
-        <form action="update_insurance.php" method="post">
+        <form method="post">
+            {% csrf_token %}
             <div class="input-group">
                 <label for="patientID">患者ID:</label>
                 <input type="text" id="patientID" name="patientID" required>
             </div>
             <div class="input-group">
                 <label for="insuranceNumber">保険証番号:</label>
-                <input type="text" id="insuranceNumber" name="insuranceNumber" required>
+                <input type="text" id="insuranceNumber" name="insuranceNumber">
             </div>
             <div class="input-group">
                 <label for="insuranceExpiration">有効期限:</label>
-                <input type="date" id="insuranceExpiration" name="insuranceExpiration" required>
+                <input type="date" id="insuranceExpiration" name="insuranceExpiration">
             </div>
             <button type="submit">変更</button>
         </form>
@@ -116,4 +117,6 @@
 </main>
 </body>
 </html>
+
+
 

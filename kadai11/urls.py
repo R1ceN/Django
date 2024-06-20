@@ -15,7 +15,7 @@ urlpatterns = [
     path('change_employee_name/', views.change_employee_name, name='change_employee_name'),
     path('change-password/', views.change_password, name='change_password'),
     path('register_patient/', views.register_patient, name='register_patient'),
-    path('patientmanagement/', views.PatientManagement, name='PatientManagement'),
+    path('update_insurance/', views.update_insurance, name='update_insurance'),
     path('patientsearchexpired/', views.PatientSearchExpired, name='PatientSearchExpired'),
     path('patientsearchall/', views.PatientSearchAll, name='PatientSearchAll'),
     path('drugadministrationinstructions/', views.DrugAdministrationInstructions,
