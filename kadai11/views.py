@@ -2,10 +2,7 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
-
-from .models import Employee
-from .models import Patient
-from .models import Shiiregyosha
+from .models import Employee, Patient, Shiiregyosha, Medicine, Treatment
 
 
 def login(request):
@@ -143,11 +140,11 @@ def add_supplier(request):
     return render(request, '仕入れ先追加.html')
 
 
-def EmployeeReception(request):
+def employee_reception(request):
     return render(request, '従業員受付.html')
 
 
-def EmployeeDoctor(request):
+def employee_doctor(request):
     return render(request, '従業員医師.html')
 
 
@@ -238,13 +235,134 @@ def PatientSearchAll(request):
     return render(request, '患者検索（全件）.html', {'patients': patients})
 
 
-def DrugAdministrationInstructions(request):
-    return render(request, '薬投与指示.html')
+# 一時的な指示リストをセッションから取得
+def get_temporary_instructions(request):
+    return request.session.get('temporary_instructions', [])
+
+# 一時的な指示リストをセッションに保存
+def save_temporary_instructions(request, instructions):
+    request.session['temporary_instructions'] = instructions
+
+# 薬投与指示ビュー
+def drug_administration_instructions(request):
+    medicines = Medicine.objects.all()
+    patients = Patient.objects.all()
+    temporary_instructions = get_temporary_instructions(request)
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        if action == 'add':
+            patient_id = request.POST.get('patient')
+            medicine_id = request.POST.get('medicine')
+            quantity = request.POST.get('quantity')
+
+            if not quantity.isdigit() or int(quantity) <= 0:
+                messages.error(request, '数量は正の整数である必要があります。')
+            else:
+                try:
+                    patient = Patient.objects.get(patid=patient_id)
+                    medicine = Medicine.objects.get(medicineid=medicine_id)
+                    temporary_instructions.append({
+                        'patient': patient.patid,
+                        'patfname': patient.patfname,
+                        'patlname': patient.patlname,
+                        'hokenmei': patient.hokenmei,
+                        'medicine': medicine.medicineid,
+                        'medicinename': medicine.medicinename,
+                        'unit': medicine.unit,
+                        'quantity': quantity
+                    })
+                    save_temporary_instructions(request, temporary_instructions)
+                    messages.success(request, '薬剤投与指示が一時的に追加されました。')
+                except Patient.DoesNotExist:
+                    messages.error(request, '患者が見つかりません。')
+                except Medicine.DoesNotExist:
+                    messages.error(request, '薬剤が見つかりません。')
+
+        return redirect('drug_administration_instructions')
+
+    return render(request, '薬投与指示.html', {
+        'medicines': medicines,
+        'patients': patients,
+        'instructions': temporary_instructions
+    })
+
+# 薬投与削除・確定ビュー
+def drug_administration_confirm(request):
+    temporary_instructions = get_temporary_instructions(request)
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'delete':
+            index = int(request.POST.get('index'))
+            if 0 <= index < len(temporary_instructions):
+                del temporary_instructions[index]
+                save_temporary_instructions(request, temporary_instructions)
+                messages.success(request, '薬剤投与指示が削除されました。')
+            else:
+                messages.error(request, '無効なインデックスです。')
+        elif action == 'confirm':
+            for instruction in temporary_instructions:
+                Treatment.objects.create(
+                    patid=Patient.objects.get(patid=instruction['patient']),
+                    patfname=instruction['patfname'],
+                    patlname=instruction['patlname'],
+                    hokenmei=instruction['hokenmei'],
+                    medicineid=Medicine.objects.get(medicineid=instruction['medicine']),
+                    medicinename=instruction['medicinename'],
+                    unit=instruction['unit'],
+                    quantity=instruction['quantity']
+                )
+            temporary_instructions.clear()
+            save_temporary_instructions(request, temporary_instructions)
+            messages.success(request, '処置が確定されました。')
+            return HttpResponse('処置が確定されました。')
+
+    return render(request, '薬投与削除・確定.html', {
+        'instructions': temporary_instructions
+    })
+
+# 履歴表示ビュー
+def history_display(request):
+    confirmed_instructions = Treatment.objects.all()
+    return render(request, '履歴表示.html', {
+        'confirmed_instructions': confirmed_instructions
+    })
 
 
-def DrugAdministrationConfirmed(request):
-    return render(request, '薬投与確定.html')
+# 薬投与削除・確定ビュー
+def drug_administration_confirm(request):
+    temporary_instructions = get_temporary_instructions(request)
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'delete':
+            index = int(request.POST.get('index'))
+            if 0 <= index < len(temporary_instructions):
+                del temporary_instructions[index]
+                save_temporary_instructions(request, temporary_instructions)
+                messages.success(request, '薬剤投与指示が削除されました。')
+            else:
+                messages.error(request, '無効なインデックスです。')
+        elif action == 'confirm':
+            for instruction in temporary_instructions:
+                Treatment.objects.create(
+                    patid=Patient.objects.get(patid=instruction['patient']),
+                    medicineid=Medicine.objects.get(medicineid=instruction['medicine']),
+                    quantity=instruction['quantity']
+                )
+            temporary_instructions.clear()
+            save_temporary_instructions(request, temporary_instructions)
+            messages.success(request, '処置が確定されました。')
+            return HttpResponse('処置が確定されました。')
+
+    return render(request, '薬投与削除・確定.html', {
+        'instructions': temporary_instructions
+    })
 
 
-def HistoryDisplay(request):
-    return render(request, '履歴表示.html')
+# 履歴表示ビュー
+def history_display(request):
+    confirmed_instructions = Treatment.objects.all()
+    return render(request, '履歴表示.html', {
+        'confirmed_instructions': confirmed_instructions
+    })

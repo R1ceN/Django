@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>処置履歴</title>
+    <title>処置履歴表示</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
             margin: 0;
             padding: 0;
+            background-color: #f4f4f4;
         }
 
         header {
@@ -17,7 +17,6 @@
             color: #fff;
             text-align: center;
             padding: 20px 0;
-            margin-bottom: 20px; /* Add margin-bottom for separation */
         }
 
         h1 {
@@ -26,66 +25,41 @@
         }
 
         main {
-            max-width: 800px; /* Increase max-width for better content alignment */
-            margin: 0 auto; /* Center align the content */
+            max-width: 600px;
+            margin: 20px auto;
             padding: 20px;
             background-color: #fff;
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse; /* Improve table layout */
+        ul {
+            list-style-type: none;
+            padding: 0;
         }
 
-        th, td {
+        li {
+            background-color: #e9ecef;
+            margin-bottom: 10px;
             padding: 10px;
-            text-align: left; /* Align table content to the left */
-            border-bottom: 1px solid #ddd; /* Add bottom border to separate rows */
-        }
-
-        th {
-            background-color: #007bff;
-            color: #fff;
-        }
-
-        tr:hover {
-            background-color: #f2f2f2; /* Highlight row on hover */
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
 <header>
-    <h1>処置履歴</h1>
+    <h1>処置履歴表示</h1>
 </header>
 <main>
-    <table>
-        <thead>
-        <tr>
-            <th>処置日時</th>
-            <th>患者名</th>
-            <th>処置内容</th>
-            <th>数量</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>2024-05-01 10:00</td>
-            <td>患者A</td>
-            <td>薬剤投与</td>
-            <td>2</td>
-        </tr>
-        <tr>
-            <td>2024-05-02 11:30</td>
-            <td>患者B</td>
-            <td>処置A</td>
-            <td>1</td>
-        </tr>
-        <!-- Add more rows for additional treatment history -->
-        </tbody>
-    </table>
+    <h2>処置履歴</h2>
+    <ul>
+        {% for instruction in confirmed_instructions %}
+        <li>{{ instruction.patid.patlname }} {{ instruction.patid.patfname }} - {{ instruction.medicineid.medicinename }} - {{ instruction.quantity }}</li>
+        {% endfor %}
+    </ul>
 </main>
 </body>
 </html>
+
+
 

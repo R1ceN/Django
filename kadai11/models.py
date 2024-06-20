@@ -39,3 +39,11 @@ class Medicine(models.Model):
     medicineid = models.CharField(max_length=8, primary_key=True)
     medicinename = models.CharField(max_length=64)
     unit = models.CharField(max_length=8)  # 枚・ml・本など
+
+
+class Treatment(models.Model):
+    treatment_id = models.AutoField(max_length=8, primary_key=True)
+    patid = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    medicineid = models.ForeignKey(Medicine, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    treatment_date = models.DateTimeField(auto_now_add=True)

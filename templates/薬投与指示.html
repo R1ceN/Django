@@ -52,16 +52,21 @@
             box-sizing: border-box;
         }
 
-        button[type="submit"] {
+        button[type="submit"],
+        a.button {
             background-color: #007bff;
             color: #fff;
             border: none;
             padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-right: 10px;
         }
 
-        button[type="submit"]:hover {
+        button[type="submit"]:hover,
+        a.button:hover {
             background-color: #0056b3;
         }
     </style>
@@ -71,22 +76,34 @@
     <h1>薬剤投与指示</h1>
 </header>
 <main>
-    <form action="add_to_cart.php" method="post">
+    <form action="{% url 'drug_administration_instructions' %}" method="post">
+        {% csrf_token %}
+        <label for="patient">患者名：</label>
+        <select id="patient" name="patient">
+            {% for patient in patients %}
+            <option value="{{ patient.patid }}">{{ patient.patlname }} {{ patient.patfname }}</option>
+            {% endfor %}
+        </select>
         <label for="medicine">薬剤名：</label>
         <select id="medicine" name="medicine">
-            <option value="medicine1">薬剤1</option>
-            <option value="medicine2">薬剤2</option>
-            <option value="medicine3">薬剤3</option>
+            {% for medicine in medicines %}
+            <option value="{{ medicine.medicineid }}">{{ medicine.medicinename }}</option>
+            {% endfor %}
         </select>
         <label for="quantity">数量：</label>
         <input type="text" id="quantity" name="quantity">
-        <button type="submit">カートに追加</button>
+        <button type="submit" name="action" value="add">追加</button>
     </form>
-
-    <!-- ここにカートの内容を表示する場合のコードを追加 -->
-    <!-- カートの内容がある場合はここに表示する -->
-    <!-- カートが空の場合は「カートに追加された薬剤はありません。」などのメッセージを表示 -->
+    <a href="{% url 'employee_doctor' %}" class="button">従業員医師に戻る</a>
+    <h2>現在の指示</h2>
+    <ul>
+        {% for instruction in instructions %}
+        <li>{{ instruction.patient }} - {{ instruction.medicine }} - {{ instruction.quantity }}</li>
+        {% endfor %}
+    </ul>
 </main>
 </body>
 </html>
+
+
 

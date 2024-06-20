@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>薬剤投与処理</title>
+    <title>薬剤投与削除・確定</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -33,57 +33,53 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
-        form {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        input[type="text"] {
-            width: calc(100% - 100px); /* Adjust width to fit button */
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-
         button {
             display: inline-block;
-            background-color: #007bff; /* Blue color */
+            background-color: #007bff;
             color: #fff;
             border: none;
             padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
-            vertical-align: top; /* Align button with input */
+            margin-top: 10px;
         }
 
         button:hover {
-            background-color: #0056b3; /* Darker shade of blue on hover */
+            background-color: #0056b3;
+        }
+
+        form {
+            display: inline;
         }
     </style>
 </head>
 <body>
 <header>
-    <h1>薬剤投与処理</h1>
+    <h1>薬剤投与削除・確定</h1>
 </header>
 <main>
-    <form action="delete_medication.php" method="post">
-        <label for="medicine">薬剤名：</label>
-        <input type="text" id="medicine" name="medicine" readonly value="薬剤1">
-        <button type="submit">削除</button>
-    </form>
-
-    <form action="confirm_treatment.php" method="post">
-        <button type="submit">処置確定</button>
+    <h2>現在の指示</h2>
+    <ul>
+        {% for instruction in instructions %}
+        <li>{{ instruction.patient }} - {{ instruction.medicine }} - {{ instruction.quantity }}
+            <form action="{% url 'drug_administration_confirm' %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <input type="hidden" name="index" value="{{ forloop.counter0 }}">
+                <button type="submit" name="action" value="delete">削除</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+    <form action="{% url 'drug_administration_confirm' %}" method="post">
+        {% csrf_token %}
+        <button type="submit" name="action" value="confirm">処置確定</button>
     </form>
 </main>
 </body>
 </html>
+
+
+
 
 
 
