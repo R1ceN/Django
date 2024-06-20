@@ -225,8 +225,13 @@ def update_insurance(request):
     return render(request, '患者保険証変更.html')
 
 
-def PatientSearchExpired(request):
-    return render(request, '患者検索期限切れ.html')
+def search_expired_insurance(request):
+    patients = []
+    if request.method == 'POST':
+        insurance_expiration = request.POST.get('insuranceExpiration')
+        patients = Patient.objects.filter(hokenexp__lt=insurance_expiration)
+
+    return render(request, '患者検索期限切れ.html', {'patients': patients})
 
 
 def PatientSearchAll(request):

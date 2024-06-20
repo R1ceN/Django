@@ -13,7 +13,7 @@
         }
 
         .container {
-            max-width: 400px;
+            max-width: 600px;
             margin: 50px auto;
             padding: 20px;
             background-color: #fff;
@@ -36,7 +36,7 @@
             color: #666;
         }
 
-        input[type="text"] {
+        input[type="date"] {
             width: 100%;
             padding: 10px;
             margin-bottom: 10px;
@@ -52,21 +52,78 @@
             padding: 10px 20px;
             border-radius: 4px;
             cursor: pointer;
+            margin-top: 10px;
         }
 
         button[type="submit"]:hover {
             background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .no-results {
+            text-align: center;
+            color: #999;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
 <div class="container">
     <h2>保険証有効期限切れ患者検索</h2>
-    <form action="search_expired_insurance.php" method="post">
+    <form method="post">
+        {% csrf_token %}
         <label for="insuranceExpiration">有効期限切れ日:</label>
         <input type="date" id="insuranceExpiration" name="insuranceExpiration" required>
         <button type="submit">検索</button>
     </form>
+
+    {% if patients %}
+    <table>
+        <thead>
+            <tr>
+                <th>患者ID</th>
+                <th>患者姓</th>
+                <th>患者名</th>
+                <th>保険証番号</th>
+                <th>有効期限</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for patient in patients %}
+            <tr>
+                <td>{{ patient.patid }}</td>
+                <td>{{ patient.patfname }}</td>
+                <td>{{ patient.patlname }}</td>
+                <td>{{ patient.hokenmei }}</td>
+                <td>{{ patient.hokenexp }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="no-results">該当する患者が見つかりませんでした。</div>
+    {% endif %}
 </div>
 </body>
 </html>
+
