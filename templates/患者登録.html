@@ -89,6 +89,19 @@
             text-decoration: underline;
         }
     </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dateInput = document.getElementById('hokenexp');
+            dateInput.addEventListener('input', function (event) {
+                const value = event.target.value;
+                const parts = value.split('-');
+                if (parts[0].length > 4) {
+                    parts[0] = parts[0].slice(0, 4);
+                    event.target.value = parts.join('-');
+                }
+            });
+        });
+    </script>
 </head>
 <body>
 <header>
@@ -97,23 +110,36 @@
 <main>
     <div class="form-container">
         <h2>患者登録</h2>
-        <form action="register_patient.php" method="post">
+        <form method="post">
+            {% csrf_token %}
             <div class="input-group">
-                <label for="last-name">姓:</label>
-                <input type="text" id="last-name" name="last-name" required>
+                <label for="patid">患者ID:</label>
+                <input type="text" id="patid" name="patid" required>
             </div>
             <div class="input-group">
-                <label for="first-name">名:</label>
-                <input type="text" id="first-name" name="first-name" required>
+                <label for="patlname">患者姓:</label>
+                <input type="text" id="patlname" name="patlname" required>
             </div>
             <div class="input-group">
-                <label for="dob">生年月日:</label>
-                <input type="date" id="dob" name="dob" required>
+                <label for="patfname">患者名:</label>
+                <input type="text" id="patfname" name="patfname" required>
+            </div>
+            <div class="input-group">
+                <label for="hokenmei">保険証名記号番号:</label>
+                <input type="text" id="hokenmei" name="hokenmei" required>
+            </div>
+            <div class="input-group">
+                <label for="hokenexp">有効期限:</label>
+                <input type="date" id="hokenexp" name="hokenexp" required>
             </div>
             <button type="submit">登録する</button>
         </form>
     </div>
 </main>
+<a href="{% url 'employee_reception' %}" class="back-button">戻る</a>
 </body>
 </html>
+
+
+
 

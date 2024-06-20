@@ -2,11 +2,10 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from .models import Employee
-from .models import Shiiregyosha
 
-from django.contrib.auth.hashers import make_password
-from django.contrib.auth import update_session_auth_hash
+from .models import Employee
+from .models import Patient
+from .models import Shiiregyosha
 
 
 def login(request):
@@ -182,6 +181,25 @@ def change_password(request):
             messages.error(request, f'エラーが発生しました: {str(e)}')
 
     return render(request, '従業員情報変更ps.html')
+
+
+def register_patient(request):
+    if request.method == 'POST':
+        patid = request.POST.get('patid')
+        patfname = request.POST.get('patfname')
+        patlname = request.POST.get('patlname')
+        hokenmei = request.POST.get('hokenmei')
+        hokenexp = request.POST.get('hokenexp')
+
+        try:
+            Patient.objects.create(patid=patid, patfname=patfname, patlname=patlname,
+                                   hokenmei=hokenmei, hokenexp=hokenexp)
+            messages.success(request, '患者が正常に登録されました。')
+            return redirect('register_patient')
+        except Exception as e:
+            messages.error(request, f'患者の登録に失敗しました: {e}')
+
+    return render(request, '患者登録.html')
 
 
 def PatientManagement(request):
