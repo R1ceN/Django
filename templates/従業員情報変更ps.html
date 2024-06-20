@@ -62,7 +62,17 @@
 <body>
 <div class="container">
     <h2>パスワード変更</h2>
-    <form action="update_password.php" method="post">
+
+    <div class="messages">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
         <label for="currentPassword">現在のパスワード:</label>
         <input type="password" id="currentPassword" name="currentPassword" required>
         <label for="newPassword">新しいパスワード:</label>
@@ -74,4 +84,5 @@
 </div>
 </body>
 </html>
+
 

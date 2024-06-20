@@ -5,6 +5,9 @@ from django.urls import reverse
 from .models import Employee
 from .models import Shiiregyosha
 
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth import update_session_auth_hash
+
 
 def login(request):
     if request.method == 'POST':
@@ -15,8 +18,9 @@ def login(request):
 
         try:
             user = Employee.objects.get(empid=empid)
-            if password == user.emppasswd:  # Direct password comparison (not secure)
-                login(request)
+            if password == user.emppasswd:  # ハッシュ化を行わずに直接比較
+                request.session['user_id'] = user.empid  # セッションにユーザーIDを保存
+                request.session['is_authenticated'] = True  # セッションに認証状態を保存
                 if user.emprole == 1:  # 管理者
                     return render(request, '管理者.html')
                 elif user.emprole == 2:  # 受付
@@ -148,12 +152,36 @@ def EmployeeDoctor(request):
     return render(request, '従業員医師.html')
 
 
-def ChangeEmployeeInformation(request):
+def change_password(request):
+    if not request.session.get('is_authenticated', False):
+        return redirect('login')
+
+    user_id = request.session['user_id']
+
+    if request.method == 'POST':
+        current_password = request.POST['currentPassword']
+        new_password = request.POST['newPassword']
+        confirm_password = request.POST['confirmPassword']
+
+        try:
+            user = Employee.objects.get(empid=user_id)
+            if current_password != user.emppasswd:
+                messages.error(request, '現在のパスワードが正しくありません。')
+            elif new_password != confirm_password:
+                messages.error(request, '新しいパスワードと確認用パスワードが一致しません。')
+            elif current_password == new_password:
+                messages.error(request, '新しいパスワードは現在のパスワードと異なる必要があります。')
+            else:
+                user.emppasswd = new_password  # パスワードを平文で保存
+                user.save()
+                messages.success(request, 'パスワードが正常に変更されました。')
+                return redirect('employee_reception' if user.emprole == 2 else 'EmployeeDoctor')
+        except Employee.DoesNotExist:
+            messages.error(request, 'ユーザーが見つかりません。')
+        except Exception as e:
+            messages.error(request, f'エラーが発生しました: {str(e)}')
+
     return render(request, '従業員情報変更ps.html')
-
-
-def PatientRegistration(request):
-    return render(request, '患者登録.html')
 
 
 def PatientManagement(request):
