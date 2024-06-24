@@ -65,7 +65,7 @@
             margin-right: 10px;
         }
 
-        button[type="submit"]:hover,
+        button[type="submit"]:hover, 
         a.button:hover {
             background-color: #0056b3;
         }
@@ -78,10 +78,10 @@
 <main>
     <form action="{% url 'drug_administration_instructions' %}" method="post">
         {% csrf_token %}
-        <label for="patient">患者名：</label>
-        <select id="patient" name="patient">
+        <label for="patient">患者：</label>
+        <select id="patient" name="patient_id">
             {% for patient in patients %}
-            <option value="{{ patient.patid }}">{{ patient.patlname }} {{ patient.patfname }}</option>
+            <option value="{{ patient.patid }}">{{ patient.patfname }} {{ patient.patlname }}</option>
             {% endfor %}
         </select>
         <label for="medicine">薬剤名：</label>
@@ -92,18 +92,13 @@
         </select>
         <label for="quantity">数量：</label>
         <input type="text" id="quantity" name="quantity">
-        <button type="submit" name="action" value="add">追加</button>
+        <button type="submit">追加</button>
+        <a href="{% url 'employee_doctor' %}" class="button">戻る</a>
     </form>
-    <a href="{% url 'employee_doctor' %}" class="button">従業員医師に戻る</a>
-    <h2>現在の指示</h2>
-    <ul>
-        {% for instruction in instructions %}
-        <li>{{ instruction.patient }} - {{ instruction.medicine }} - {{ instruction.quantity }}</li>
-        {% endfor %}
-    </ul>
 </main>
 </body>
 </html>
+
 
 
 

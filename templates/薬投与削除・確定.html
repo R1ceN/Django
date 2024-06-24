@@ -3,76 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>薬剤投与削除・確定</title>
+    <title>薬剤投与処理</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
             background-color: #f4f4f4;
         }
-
-        header {
-            background-color: #007bff;
-            color: #fff;
-            text-align: center;
-            padding: 20px 0;
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
         h1 {
-            margin: 0;
-            font-size: 24px;
+            text-align: center;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
         }
-
-        main {
-            max-width: 600px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
         }
-
-        button {
-            display: inline-block;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
         }
-
-        button:hover {
-            background-color: #0056b3;
+        th {
+            background-color: #f2f2f2;
         }
-
-        form {
-            display: inline;
+        .note {
+            background-color: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
 <header>
-    <h1>薬剤投与削除・確定</h1>
+    <h1>薬剤投与処理</h1>
 </header>
-<main>
-    <h2>現在の指示</h2>
-    <ul>
-        {% for instruction in instructions %}
-        <li>{{ instruction.patient }} - {{ instruction.medicine }} - {{ instruction.quantity }}
-            <form action="{% url 'drug_administration_confirm' %}" method="post" style="display:inline;">
-                {% csrf_token %}
-                <input type="hidden" name="index" value="{{ forloop.counter0 }}">
-                <button type="submit" name="action" value="delete">削除</button>
-            </form>
-        </li>
-        {% endfor %}
-    </ul>
+<main class="container">
     <form action="{% url 'drug_administration_confirm' %}" method="post">
         {% csrf_token %}
-        <button type="submit" name="action" value="confirm">処置確定</button>
+        <table>
+            <thead>
+                <tr>
+                    <th>患者ID</th>
+                    <th>患者名</th>
+                    <th>保険証番号</th>
+                    <th>薬剤ID</th>
+                    <th>薬剤名</th>
+                    <th>数量</th>
+                    <th>単位</th>
+                    <th>追加日</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for instruction in instructions %}
+                <tr>
+                    <td>{{ instruction.patient }}</td>
+                    <td>{{ instruction.patfname }} {{ instruction.patlname }}</td>
+                    <td>{{ instruction.hokenmei }}</td>
+                    <td>{{ instruction.medicine }}</td>
+                    <td>{{ instruction.medicinename }}</td>
+                    <td>
+                        <input type="number" name="quantities" value="{{ instruction.quantity }}" min="1" data-index="{{ forloop.counter0 }}">
+                        <input type="hidden" name="index" value="{{ forloop.counter0 }}">
+                    </td>
+                    <td>{{ instruction.unit }}</td>
+                    <td>{{ instruction.created_at }}</td>
+                    <td>
+                        <button type="submit" name="delete" value="{{ forloop.counter0 }}" class="btn-small">削除</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit" name="update_all" class="button">更新</button>
+        <button type="submit" name="confirm" class="button">確定</button>
+        <a href="{% url 'employee_doctor' %}" class="button">戻る</a>
     </form>
 </main>
 </body>
