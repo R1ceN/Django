@@ -3,63 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>処置履歴表示</title>
+    <title>履歴表示</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
             background-color: #f4f4f4;
         }
-
-        header {
-            background-color: #007bff;
-            color: #fff;
-            text-align: center;
-            padding: 20px 0;
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
         h1 {
-            margin: 0;
-            font-size: 24px;
+            text-align: center;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
         }
-
-        main {
-            max-width: 600px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
         }
-
-        ul {
-            list-style-type: none;
-            padding: 0;
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
         }
-
-        li {
-            background-color: #e9ecef;
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 5px;
+        th {
+            background-color: #f2f2f2;
+        }
+        .note {
+            background-color: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
 <header>
-    <h1>処置履歴表示</h1>
+    <h1>履歴表示</h1>
 </header>
-<main>
-    <h2>処置履歴</h2>
-    <ul>
-        {% for instruction in confirmed_instructions %}
-        <li>{{ instruction.patid.patlname }} {{ instruction.patid.patfname }} - {{ instruction.medicineid.medicinename }} - {{ instruction.quantity }}</li>
-        {% endfor %}
-    </ul>
+<main class="container">
+    <table>
+        <thead>
+            <tr>
+                <th>従業員ID</th>
+                <th>従業員名</th>
+                <th>患者ID</th>
+                <th>患者名</th>
+                <th>保険証番号</th>
+                <th>薬剤ID</th>
+                <th>薬剤名</th>
+                <th>数量・単位</th>
+                <th>追加日</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for instruction in confirmed_instructions %}
+            <tr>
+                <td>{{ instruction.employee.empid }}</td>
+                <td>{{ instruction.employee.empfname }} {{ instruction.employee.emplname }}</td>
+                <td>{{ instruction.patient.patid }}</td>
+                <td>{{ instruction.patient.patfname }} {{ instruction.patient.patlname }}</td>
+                <td>{{ instruction.patient.hokenmei }}</td>
+                <td>{{ instruction.medicine.medicineid }}</td>
+                <td>{{ instruction.medicine.medicinename }}</td>
+                <td>{{ instruction.quantity }} {{ instruction.medicine.unit }}</td>
+                <td>{{ instruction.confirmed_at }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'employee_doctor' %}" class="button">戻る</a>
 </main>
 </body>
 </html>
+
+
+       
+
 
 
 

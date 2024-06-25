@@ -67,6 +67,7 @@
                     <th>数量</th>
                     <th>単位</th>
                     <th>追加日</th>
+                    <th>操作</th>
                 </tr>
             </thead>
             <tbody>
@@ -79,7 +80,7 @@
                     <td>{{ instruction.medicinename }}</td>
                     <td>
                         <input type="number" name="quantities" value="{{ instruction.quantity }}" min="1" data-index="{{ forloop.counter0 }}">
-                        <input type="hidden" name="index" value="{{ forloop.counter0 }}">
+                        <input type="hidden" name="indices" value="{{ forloop.counter0 }}">
                     </td>
                     <td>{{ instruction.unit }}</td>
                     <td>{{ instruction.created_at }}</td>
@@ -97,8 +98,6 @@
 </main>
 </body>
 </html>
-
-
 
 
 

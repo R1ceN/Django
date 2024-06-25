@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>処置確定</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+    <script>
+        // 自動的にリダイレクトするタイマーを設定
+        setTimeout(function(){
+            window.location.href = "{% url 'employee_doctor' %}";
+        }, 5000); // 5000ミリ秒 (5秒) 後にリダイレクト
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>処置が確定されました。</h1>
+        <p>5秒後に自動的に従業員医師のページに戻ります。</p>
+        <a href="{% url 'employee_doctor' %}" class="button">戻る</a>
+    </div>
+</body>
+</html>

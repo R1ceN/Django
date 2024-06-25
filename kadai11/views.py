@@ -6,6 +6,7 @@ from django.utils import timezone
 from .models import Employee, Patient, Shiiregyosha, Medicine, Treatment
 
 
+
 def login(request):
     if request.method == 'POST':
         empid = request.POST.get('empid')
@@ -293,49 +294,51 @@ def drug_administration_confirm(request):
     temporary_instructions = get_temporary_instructions(request)
     if request.method == 'POST':
         if 'delete' in request.POST:
-            index = int(request.POST.get('index'))
+            index = int(request.POST.get('delete'))
             if 0 <= index < len(temporary_instructions):
                 del temporary_instructions[index]
                 save_temporary_instructions(request, temporary_instructions)
                 messages.success(request, '薬剤投与指示が削除されました。')
             else:
                 messages.error(request, '無効なインデックスです。')
-        elif 'update_quantity' in request.POST:
-            index = int(request.POST.get('index'))
-            new_quantity = int(request.POST.get('new_quantity'))
-            if 0 <= index < len(temporary_instructions) and new_quantity > 0:
-                temporary_instructions[index]['quantity'] = new_quantity
-                save_temporary_instructions(request, temporary_instructions)
-                messages.success(request, '数量が更新されました。')
-            else:
-                messages.error(request, '無効なインデックスまたは数量です。')
+        elif 'update_all' in request.POST:
+            quantities = request.POST.getlist('quantities')
+            indices = request.POST.getlist('indices')
+            for i, index in enumerate(indices):
+                idx = int(index)
+                new_quantity = int(quantities[i])
+                if 0 <= idx < len(temporary_instructions) and new_quantity > 0:
+                    temporary_instructions[idx]['quantity'] = new_quantity
+                else:
+                    messages.error(request, '無効なインデックスまたは数量です。')
+            save_temporary_instructions(request, temporary_instructions)
+            messages.success(request, '数量が更新されました。')
         elif 'confirm' in request.POST:
             user_id = request.session.get('user_id')
             employee = Employee.objects.get(empid=user_id)
             for instruction in temporary_instructions:
+                patient = Patient.objects.get(patid=instruction['patient'])
+                medicine = Medicine.objects.get(medicineid=instruction['medicine'])
                 Treatment.objects.create(
-                    patid=Patient.objects.get(patid=instruction['patient']),
-                    patfname=instruction['patfname'],
-                    patlname=instruction['patlname'],
-                    hokenmei=instruction['hokenmei'],
-                    medicineid=Medicine.objects.get(medicineid=instruction['medicine']),
-                    medicinename=instruction['medicinename'],
-                    unit=instruction['unit'],
+                    patient=patient,
+                    medicine=medicine,
+                    employee=employee,  # 従業員情報を保存
                     quantity=instruction['quantity'],
                     confirmed_at=timezone.now()
                 )
             temporary_instructions.clear()
             save_temporary_instructions(request, temporary_instructions)
             messages.success(request, '処置が確定されました。')
-            return HttpResponse('処置が確定されました。')
+            return render(request, '処置確定.html')  # 成功テンプレートをレンダリング
 
     return render(request, '薬投与削除・確定.html', {
         'instructions': temporary_instructions
     })
 
 
+
+
+
 def history_display(request):
     confirmed_instructions = Treatment.objects.all()
-    return render(request, '履歴表示.html', {
-        'confirmed_instructions': confirmed_instructions
-    })
+    return render(request, '履歴表示.html', {'confirmed_instructions': confirmed_instructions})

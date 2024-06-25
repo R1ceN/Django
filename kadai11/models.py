@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 class Tabyouin(models.Model):
@@ -40,10 +41,10 @@ class Medicine(models.Model):
     medicinename = models.CharField(max_length=64)
     unit = models.CharField(max_length=8)  # 枚・ml・本など
 
-
 class Treatment(models.Model):
-    treatment_id = models.AutoField(max_length=8, primary_key=True)
-    patid = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    medicineid = models.ForeignKey(Medicine, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField()
-    treatment_date = models.DateTimeField(auto_now_add=True)
+    treatmentid = models.AutoField(primary_key=True)
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, default=1)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
+    quantity = models.IntegerField()
+    confirmed_at = models.DateTimeField(default=timezone.now, null=False)
