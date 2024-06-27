@@ -31,15 +31,22 @@
             border-bottom: 2px solid #3498db;
             padding-bottom: 10px;
         }
+        .button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>電話番号が更新されました。</h1>
         <p>5秒後に自動的に仕入れのページに戻ります。</p>
+        <a href="{% url 'supplier_menu' %}" class="button">今すぐ戻る</a>
     </div>
-</body>
-</html>
-
 </body>
 </html>

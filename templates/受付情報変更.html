@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>情報変更完了</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        p {
+            margin: 20px 0;
+            color: #666;
+        }
+
+        a {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        a:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    <script>
+        setTimeout(function(){
+            window.location.href = "{% url 'employee_reception' %}";
+        }, 5000);  // 5秒後にリダイレクト
+    </script>
+</head>
+<body>
+<main>
+    <div class="container">
+        <h1>情報変更完了</h1>
+        <p>従業員の情報が正常に変更されました。</p>
+        <p>5秒後に従業員受付ページに戻ります。</p>
+        <a href="{% url 'employee_reception' %}">今すぐ戻る</a>
+    </div>
+</main>
+</body>
+</html>

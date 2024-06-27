@@ -86,7 +86,7 @@
 </header>
 <main>
     <h2>検索</h2>
-    <form method="get" action="">
+    <form method="get" action="{% url 'search_patients' %}">
         <div class="form-group">
             <label for="search_type">検索タイプ:</label>
             <select id="search_type" name="search_type" onchange="toggleSearchValue()">
@@ -136,6 +136,7 @@
 </script>
 </body>
 </html>
+
 
 
 

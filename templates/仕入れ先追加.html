@@ -57,6 +57,11 @@
         button[type="submit"]:hover {
             background-color: #0056b3;
         }
+
+        .error {
+            color: red;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -68,6 +73,11 @@
         <h2>仕入先追加フォーム</h2>
         <form method="post">
             {% csrf_token %}
+            <div class="error">
+                {% for error in errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
+            </div>
             <label for="shiireid">仕入先ID:</label>
             <input type="text" id="shiireid" name="shiireid" required>
             <label for="shiiremei">仕入先名:</label>
@@ -87,3 +97,4 @@
 </main>
 </body>
 </html>
+

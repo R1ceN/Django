@@ -1,7 +1,6 @@
 from django.contrib import messages
 import re
-from datetime import datetime, date
-from django.http import HttpResponse
+from datetime import datetime
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -43,20 +42,23 @@ def admin_page(request):
 
 def register_employee(request):
     if request.method == 'POST':
+        empid = request.POST.get('empid')
         empfname = request.POST.get('firstName')
         emplname = request.POST.get('lastName')
-        email = request.POST.get('email')
-        empid = email.split('@')[0]  # emailの@より前をempidとして使用
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirm_password')
         emprole = request.POST.get('role')
 
         if password != confirm_password:
-            return render(request, '従業員登録.html', {'error': 'Passwords do not match'})
+            return render(request, '従業員登録.html', {'error': 'パスワードが違います。'})
 
         try:
-            Employee.objects.create(empid=empid, empfname=empfname, emplname=emplname, emppasswd=password,
-                                    emprole=emprole)
+            if Employee.objects.filter(empid=empid).exists():
+                return render(request, '従業員登録.html',
+                              {'error': '従業員IDは既に存在します。別のIDを入力してください。'})
+
+            Employee.objects.create(empid=empid, empfname=empfname, emplname=emplname,
+                                    emppasswd=password, emprole=emprole)
             return render(request, '登録成功.html')  # 登録成功テンプレートをレンダリング
         except Exception as e:
             return render(request, '従業員登録.html', {'error': str(e)})
@@ -116,6 +118,7 @@ def search_by_capital(request):
 
     return render(request, '資本金検索.html', {'suppliers': suppliers, 'query': capital_query})
 
+
 def change_employee_name(request):
     if request.method == 'POST':
         employee_id = request.POST.get('employee_id')
@@ -128,6 +131,7 @@ def change_employee_name(request):
             employee.emplname = new_lname
             employee.save()
             messages.success(request, '従業員の氏名が正常に更新されました。')
+            return render(request, '従業員氏名変更完了.html')
         except Employee.DoesNotExist:
             messages.error(request, '従業員IDが見つかりません。')
 
@@ -138,12 +142,47 @@ def change_employee_name(request):
 
 def add_supplier(request):
     if request.method == 'POST':
-        shiireid = request.POST.get('shiireid')
-        shiiremei = request.POST.get('shiiremei')
-        shiireaddress = request.POST.get('shiireaddress')
-        shiiretel = request.POST.get('shiiretel')
-        shihonkin = request.POST.get('shihonkin')
-        nouki = request.POST.get('nouki')
+        shiireid = request.POST.get('shiireid').strip()
+        shiiremei = request.POST.get('shiiremei').strip()
+        shiireaddress = request.POST.get('shiireaddress').strip()
+        shiiretel = request.POST.get('shiiretel').strip()
+        shihonkin = request.POST.get('shihonkin').strip()
+        nouki = request.POST.get('nouki').strip()
+
+        errors = []
+        shihonkin_value = None
+        nouki_value = None
+
+        # 全項目が空欄の場合
+        if not (shiireid and shiiremei and shiireaddress and shiiretel and shihonkin and nouki):
+            errors.append("すべての項目を入力してください。")
+
+        # 重複IDのチェック
+        if Shiiregyosha.objects.filter(shiireid=shiireid).exists():
+            errors.append("この仕入先IDは既に存在します。別のIDを入力してください。")
+
+        # 電話番号のバリデーション
+        if not re.match(r'^[0-9()-]+$', shiiretel):
+            errors.append('電話番号には数字、ハイフン、括弧のみを使用してください。')
+
+        # 資本金のバリデーション
+        try:
+            shihonkin_value = int(shihonkin.replace('￥', '').replace(',', ''))
+            if shihonkin_value < 1:
+                errors.append('資本金は1以上の数値を入力してください。')
+        except ValueError:
+            errors.append('資本金には数値、カンマ、円記号のみを使用してください。')
+
+        # 納期のバリデーション
+        try:
+            nouki_value = int(nouki)
+            if nouki_value < 1:
+                errors.append('納期は1日以上の数値を入力してください。')
+        except ValueError:
+            errors.append('納期には数値のみを使用してください。')
+
+        if errors:
+            return render(request, '仕入れ先追加.html', {'errors': errors})
 
         try:
             Shiiregyosha.objects.create(
@@ -151,16 +190,21 @@ def add_supplier(request):
                 shiiremei=shiiremei,
                 shiireaddress=shiireaddress,
                 shiiretel=shiiretel,
-                shihonkin=shihonkin,
-                nouki=nouki
+                shihonkin=shihonkin_value,
+                nouki=nouki_value
             )
-            messages.success(request, '仕入先が正常に追加されました。')
+            return render(request, '仕入れ先追加完了.html')  # 登録完了テンプレートをレンダリング
         except Exception as e:
             messages.error(request, f'仕入先の追加に失敗しました: {str(e)}')
 
         return redirect('add_supplier')
 
     return render(request, '仕入れ先追加.html')
+
+
+def supplier_list(request):
+    suppliers = Shiiregyosha.objects.all()
+    return render(request, '仕入れ先一覧.html', {'suppliers': suppliers})
 
 
 def employee_reception(request):
@@ -193,13 +237,44 @@ def change_password(request):
             else:
                 user.emppasswd = new_password  # パスワードを平文で保存
                 user.save()
-                return redirect('employee_reception' if user.emprole == 2 else 'EmployeeDoctor')
+                return render(request, '受付情報変更.html')  # 登録完了テンプレートをレンダリング
         except Employee.DoesNotExist:
             messages.error(request, 'ユーザーが見つかりません。')
         except Exception as e:
             messages.error(request, f'エラーが発生しました: {str(e)}')
 
     return render(request, '従業員情報変更ps.html')
+
+
+def change_password1(request):
+    if not request.session.get('is_authenticated', False):
+        return redirect('login')
+
+    user_id = request.session['user_id']
+
+    if request.method == 'POST':
+        current_password = request.POST['currentPassword']
+        new_password = request.POST['newPassword']
+        confirm_password = request.POST['confirmPassword']
+
+        try:
+            user = Employee.objects.get(empid=user_id)
+            if current_password != user.emppasswd:
+                messages.error(request, '現在のパスワードが正しくありません。')
+            elif new_password != confirm_password:
+                messages.error(request, '新しいパスワードと確認用パスワードが一致しません。')
+            elif current_password == new_password:
+                messages.error(request, '新しいパスワードは現在のパスワードと異なる必要があります。')
+            else:
+                user.emppasswd = new_password  # パスワードを平文で保存
+                user.save()
+                return render(request, '医師情報変更.html')  # 登録完了テンプレートをレンダリング
+        except Employee.DoesNotExist:
+            messages.error(request, 'ユーザーが見つかりません。')
+        except Exception as e:
+            messages.error(request, f'エラーが発生しました: {str(e)}')
+
+    return render(request, '従業員情報変更ps1.html')
 
 
 def register_patient(request):
@@ -284,19 +359,20 @@ def search_expired_insurance(request):
     return render(request, '患者検索期限切れ.html', {'patients': patients})
 
 
-def patient_search(request):
-    search_type = request.GET.get('search_type', 'all')
-    search_value = request.GET.get('search_value', '').strip()
+def search_patients(request):
+    search_type = request.GET.get('search_type')
+    search_value = request.GET.get('search_value')
     patients = []
 
     if search_type == 'all':
         patients = Patient.objects.all()
-    elif search_type == 'name' and search_value:
-        patients = Patient.objects.filter(patfname__icontains=search_value) | Patient.objects.filter(patlname__icontains=search_value)
-    elif search_type == 'id' and search_value:
+    elif search_type == 'id':
         patients = Patient.objects.filter(patid__icontains=search_value)
+    elif search_type == 'name':
+        patients = Patient.objects.filter(patfname__icontains=search_value) | Patient.objects.filter(patlname__icontains=search_value)
 
     return render(request, '患者検索（全件）.html', {'patients': patients})
+
 
 # 一時的な指示リストをセッションから取得
 def get_temporary_instructions(request):

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>従業員登録</title>
+    <title>従業員情報変更</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -36,8 +36,6 @@
             color: #666;
         }
 
-        input[type="text"],
-        input[type="email"],
         input[type="password"] {
             width: 100%;
             padding: 10px;
@@ -60,54 +58,40 @@
             background-color: #0056b3;
         }
 
-        .button-container {
+        .message {
             text-align: center;
+            padding: 10px;
             margin-top: 20px;
-        }
-
-        .button-container a {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: #fff;
-            text-decoration: none;
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
             border-radius: 4px;
-            transition: background-color 0.3s;
-        }
-
-        .button-container a:hover {
-            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <h2>従業員登録</h2>
+    <h2>パスワード変更</h2>
+
+    <div class="messages">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
     <form method="post">
         {% csrf_token %}
-        <div class="error">
-            {% if error %}
-                <p>{{ error }}</p>
-            {% endif %}
-        </div>
-        <label for="empid">従業員ID:</label>
-        <input type="text" id="empid" name="empid" required>
-        <label for="firstName">姓:</label>
-        <input type="text" id="firstName" name="firstName" required>
-        <label for="lastName">名:</label>
-        <input type="text" id="lastName" name="lastName" required>
-        <label for="password">パスワード:</label>
-        <input type="password" id="password" name="password" required>
-        <label for="confirm_password">パスワード確認:</label>
-        <input type="password" id="confirm_password" name="confirm_password" required>
-        <label for="role">ロール:</label>
-        <input type="text" id="role" name="role" required>
-        <button type="submit">登録</button>
+        <label for="currentPassword">現在のパスワード:</label>
+        <input type="password" id="currentPassword" name="currentPassword" required>
+        <label for="newPassword">新しいパスワード:</label>
+        <input type="password" id="newPassword" name="newPassword" required>
+        <label for="confirmPassword">新しいパスワード（再入力）:</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" required>
+        <button type="submit">変更</button>
+        <a href="{% url 'employee_doctor' %}" class="back-button">戻る</a>
     </form>
-    <div class="button-container">
-        <a href="{% url 'admin_page' %}">戻る</a>
-    </div>
 </div>
 </body>
 </html>
-

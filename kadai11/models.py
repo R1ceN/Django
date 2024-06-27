@@ -15,7 +15,7 @@ class Shiiregyosha(models.Model):
     shiireid = models.CharField(max_length=8, primary_key=True)
     shiiremei = models.CharField(max_length=64)
     shiireaddress = models.CharField(max_length=64)
-    shiiretel = models.CharField(max_length=13)
+    shiiretel = models.CharField(max_length=20)
     shihonkin = models.IntegerField()
     nouki = models.IntegerField()  # 発注して届く日数
 
