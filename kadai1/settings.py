@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'kadai11.apps.Kadai11Config',
+    'django.contrib.humanize',
 ]
 
 MIDDLEWARE = [

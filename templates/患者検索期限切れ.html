@@ -95,6 +95,7 @@
         <label for="insuranceExpiration">有効期限切れ日:</label>
         <input type="date" id="insuranceExpiration" name="insuranceExpiration" required>
         <button type="submit">検索</button>
+        <a href="{% url 'employee_reception' %}" class="back-button">戻る</a>
     </form>
 
     {% if patients %}

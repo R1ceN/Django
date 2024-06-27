@@ -61,18 +61,25 @@
     </style>
 </head>
 <body>
-<header>
     <h1>電話番号変更</h1>
-</header>
-<main>
-    <form method="post">
+    <form method="post" action="{% url 'update_supplier_phone' %}">
         {% csrf_token %}
         <label for="supplier_id">仕入れ先ID:</label>
-        <input type="text" id="supplier_id" name="supplier_id" required>
+        <input type="text" id="supplier_id" name="supplier_id" required><br>
+
         <label for="phone">新しい電話番号:</label>
-        <input type="text" id="phone" name="phone" required>
+        <input type="text" id="phone" name="phone" required><br>
+
         <button type="submit">変更</button>
+        <h2><a href="{% url 'supplier_menu' %}">戻る</a></h2>
     </form>
-</main>
+    
+    {% if errors %}
+        <ul style="color: red;">
+            {% for error in errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 </body>
 </html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>処置追加</title>
+    <script>
+        setTimeout(function(){
+            window.location.href = "{% url 'employee_doctor' %}";
+        }, 5000);  // 5000ミリ秒（5秒）後に医師画面に遷移
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+        header {
+            background-color: #007bff;
+            color: #fff;
+            padding: 20px 0;
+        }
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        main {
+            margin: 20px auto;
+            padding: 20px;
+            max-width: 600px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        a.button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+            margin-right: 10px;
+        }
+        a.button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>処置追加</h1>
+</header>
+<main>
+    <h1>処置が追加されました。</h1>
+    <p>5秒後に自動的に医師画面に戻ります。</p>
+    <a href="{% url 'employee_doctor' %}" class="button">医師画面に戻る</a>
+</main>
+</body>
+</html>
+

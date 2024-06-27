@@ -29,6 +29,35 @@
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button[type="submit"] {
+            width: 100%;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -39,19 +68,48 @@
             text-align: left;
         }
     </style>
+    <script>
+        function toggleSearchValue() {
+            const searchType = document.getElementById('search_type').value;
+            const searchValueGroup = document.getElementById('search_value_group');
+            if (searchType === 'all') {
+                searchValueGroup.style.display = 'none';
+            } else {
+                searchValueGroup.style.display = 'block';
+            }
+        }
+    </script>
 </head>
 <body>
 <header>
     <h1>患者検索</h1>
 </header>
 <main>
+    <h2>検索</h2>
+    <form method="get" action="">
+        <div class="form-group">
+            <label for="search_type">検索タイプ:</label>
+            <select id="search_type" name="search_type" onchange="toggleSearchValue()">
+                <option value="all">全件</option>
+                <option value="name">名前</option>
+                <option value="id">ID</option>
+            </select>
+        </div>
+        <div class="form-group" id="search_value_group">
+            <label for="search_value">検索値:</label>
+            <input type="text" id="search_value" name="search_value">
+        </div>
+        <button type="submit">検索</button>
+    </form>
+
+    {% if patients %}
     <h2>検索結果</h2>
     <table>
         <thead>
             <tr>
                 <th>ID</th>
-                <th>名前</th>
                 <th>姓</th>
+                <th>名</th>
                 <th>保険証番号</th>
                 <th>有効期限</th>
             </tr>
@@ -68,7 +126,17 @@
             {% endfor %}
         </tbody>
     </table>
+    {% endif %}
+    <a href="{% url 'employee_doctor' %}" class="back-button">医師に戻る</a>
 </main>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleSearchValue();
+    });
+</script>
 </body>
 </html>
+
+
+
 

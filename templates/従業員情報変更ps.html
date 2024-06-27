@@ -57,6 +57,16 @@
         button[type="submit"]:hover {
             background-color: #0056b3;
         }
+
+        .message {
+            text-align: center;
+            padding: 10px;
+            margin-top: 20px;
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -80,9 +90,38 @@
         <label for="confirmPassword">新しいパスワード（再入力）:</label>
         <input type="password" id="confirmPassword" name="confirmPassword" required>
         <button type="submit">変更</button>
+        <a href="{% url 'employee_reception' %}" class="back-button">戻る</a>
     </form>
+
+    <div id="successMessage" class="message" style="display: none;">
+        登録が完了しました。<br>5秒後に受付画面に戻ります。
+    </div>
 </div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // フォームのデータをサーバーに送信する（ここでAjaxを使用するかサーバー側の処理を呼び出す）
+            // 以下はサーバーからの成功応答をシミュレートしています。
+            const success = true; // これをサーバーの応答に基づいて設定してください
+
+            if (success) {
+                document.getElementById('successMessage').style.display = 'block';
+                setTimeout(function() {
+                    window.location.href = "{% url 'employee_reception' %}"; // 受付画面のURLに置き換えてください
+                }, 5000);
+            } else {
+                // エラーメッセージの表示などの処理
+            }
+        });
+    });
+</script>
 </body>
 </html>
+
 
 

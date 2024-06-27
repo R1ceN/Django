@@ -3,59 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>資本金検索（指定値以上）</title>
+    <title>資本金検索</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
             background-color: #f4f4f4;
         }
-
         .container {
-            max-width: 400px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-
-        h2 {
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        h1 {
             text-align: center;
-            color: #333;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
         }
-
-        form {
-            margin-top: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #666;
-        }
-
-        input[type="number"] {
+        table {
             width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
+            border-collapse: collapse;
+            margin-bottom: 20px;
         }
-
-        button[type="submit"] {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
         }
-
-        button[type="submit"]:hover {
-            background-color: #0056b3;
+        th {
+            background-color: #f2f2f2;
+        }
+        .note {
+            background-color: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -63,26 +53,43 @@
 <header>
     <h1>資本金検索</h1>
 </header>
-<main>
-    <form method="post">
+<main class="container">
+    {% load humanize %}
+    <form method="POST">
         {% csrf_token %}
-        <label for="capital">資本金:</label>
+        <label for="capital">資本金検索:</label>
         <input type="text" id="capital" name="capital" required>
         <button type="submit">検索</button>
     </form>
-
+    
     {% if suppliers %}
-        <div class="result">
-            <h2>検索結果</h2>
-            <ul>
+        <h2>検索結果</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>仕入れ先ID</th>
+                    <th>仕入れ先名</th>
+                    <th>住所</th>
+                    <th>電話番号</th>
+                    <th>資本金</th>
+                    <th>納期（日数）</th>
+                </tr>
+            </thead>
+            <tbody>
                 {% for supplier in suppliers %}
-                    <li>{{ supplier.shiiremei }} (資本金: {{ supplier.shihonkin }}円)</li>
+                <tr>
+                    <td>{{ supplier.shiireid }}</td>
+                    <td>{{ supplier.shiiremei }}</td>
+                    <td>{{ supplier.shiireaddress }}</td>
+                    <td>{{ supplier.shiiretel }}</td>
+                    <td>{{ supplier.shihonkin|intcomma }}</td>
+                    <td>{{ supplier.nouki }}</td>
+                </tr>
                 {% endfor %}
-            </ul>
-        </div>
-    {% elif suppliers is not none %}
-        <p>該当する仕入れ先が見つかりませんでした。</p>
+            </tbody>
+        </table>
     {% endif %}
+    <h2><a href="{% url 'supplier_menu' %}">戻る</a></h2>
 </main>
 </body>
 </html>
