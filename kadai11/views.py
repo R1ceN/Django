@@ -315,14 +315,10 @@ def update_insurance(request):
 
         try:
             patient = Patient.objects.get(patid=patient_id)
-            if insurance_number:
-                patient.hokenmei = insurance_number
-
-            if insurance_expiration:
+            if patient.hokenmei == insurance_number:
                 new_expiration_date = datetime.strptime(insurance_expiration, '%Y-%m-%d').date()
                 current_expiration_date = patient.hokenexp
 
-                # 新しい有効期限が現在の有効期限より新しいかどうかチェック
                 if new_expiration_date <= current_expiration_date:
                     messages.error(request, '新しい有効期限は現在の有効期限より後の日付を入力してください。')
                     return render(request, '患者保険証変更.html')
@@ -339,9 +335,12 @@ def update_insurance(request):
                 else:
                     patient.hokenexp = new_expiration_date
 
-            patient.save()
-            messages.success(request, '保険証情報が正常に更新されました。')
-            return render(request, '保険証情報変更完了.html')  # 変更完了テンプレートをレンダリング
+                patient.save()
+                messages.success(request, '保険証情報が正常に更新されました。')
+                return redirect('update_insurance')
+            else:
+                messages.error(request, '患者IDと保険証記号番号が一致しません。')
+                return redirect('update_insurance')
         except Patient.DoesNotExist:
             messages.error(request, '患者が見つかりません。')
         except Exception as e:
