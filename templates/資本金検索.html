@@ -61,7 +61,15 @@
         <input type="text" id="capital" name="capital" required>
         <button type="submit">検索</button>
     </form>
-    
+
+    {% if messages %}
+        <ul style="color: red;">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
     {% if suppliers %}
         <h2>検索結果</h2>
         <table>

@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.http import JsonResponse
 import re
 from datetime import datetime
 from django.shortcuts import render, redirect
@@ -28,11 +29,11 @@ def login(request):
                 else:
                     return redirect(reverse('home'))
             else:
-                return render(request, 'login.html', {'error': 'Invalid credentials'})
+                return render(request, 'login.html', {'error': '認証情報が無効です'})
         except Employee.DoesNotExist:
-            return render(request, 'login.html', {'error': 'User does not exist'})
+            return render(request, 'login.html', {'error': 'ユーザーが存在しません'})
         except Exception as e:
-            return render(request, 'login.html', {'error': f'An error occurred: {e}'})
+            return render(request, 'login.html', {'error': f'エラーが発生しました: {e}'})
     return render(request, 'login.html')
 
 
@@ -81,13 +82,11 @@ def update_supplier_phone(request):
         if not re.match(r'^[0-9()-]+$', new_phone):
             errors.append('電話番号には数字、ハイフン、括弧のみを使用してください。')
 
-        if re.search(r'[a-zA-Z]', new_phone):
-            errors.append('電話番号にアルファベットを使用することはできません。')
-
         cleaned_phone = new_phone.replace('-', '').replace('(', '').replace(')', '')
 
-        if len(cleaned_phone) < 10:
-            errors.append('電話番号は少なくとも10桁である必要があります（セパレータを含まない）。')
+        # Validate length of the phone number
+        if len(cleaned_phone) < 11 or len(cleaned_phone) > 12:
+            errors.append('電話番号は11桁または12桁である必要があります。')
 
         if errors:
             return render(request, '電話番号変更.html', {'errors': errors})
@@ -109,14 +108,17 @@ def search_by_capital(request):
         capital_query = request.POST.get('capital', '')
         if capital_query:
             try:
-                # 「￥」とカンマを削除して数値に変換
-                cleaned_query = capital_query.replace('￥', '').replace(',', '')
+                # 「￥」と「円」、カンマを削除して数値に変換
+                cleaned_query = re.sub(r'[￥¥円,]', '', capital_query)
                 capital_value = int(cleaned_query)
+                if capital_value < 1:
+                    raise ValueError("Capital must be 1 or greater.")
                 suppliers = Shiiregyosha.objects.filter(shihonkin__gte=capital_value)
             except ValueError:
                 suppliers = []
-
+                messages.error(request, '資本金は1以上の数値を入力してください。')
     return render(request, '資本金検索.html', {'suppliers': suppliers, 'query': capital_query})
+
 
 
 def change_employee_name(request):
@@ -307,6 +309,27 @@ def register_patient(request):
     return render(request, '患者登録.html')
 
 
+def get_insurance_number(request):
+    if request.method == 'GET':
+        patient_id = request.GET.get('patientID')
+        try:
+            patient = Patient.objects.get(patid=patient_id)
+            return JsonResponse({
+                'insuranceNumber': patient.hokenmei,
+                'insuranceExpiration': patient.hokenexp.strftime('%Y-%m-%d')
+            })
+        except Patient.DoesNotExist:
+            return JsonResponse({'insuranceNumber': '', 'insuranceExpiration': ''})
+    return JsonResponse({'error': '無効なリクエストです。'}, status=400)
+
+
+def get_patient_ids(request):
+    if request.method == 'GET':
+        patients = Patient.objects.values_list('patid', flat=True)
+        return JsonResponse(list(patients), safe=False)
+    return JsonResponse({'error': '無効なリクエストです。'}, status=400)
+
+
 def update_insurance(request):
     if request.method == 'POST':
         patient_id = request.POST.get('patientID')
@@ -315,38 +338,41 @@ def update_insurance(request):
 
         try:
             patient = Patient.objects.get(patid=patient_id)
-            if patient.hokenmei == insurance_number:
+
+            # 保険証記号番号のバリデーション
+            if insurance_number and (
+                    len(insurance_number) != 10 or not insurance_number[:8].isalnum() or not insurance_number[
+                                                                                             8:].isdigit()):
+                messages.error(request, '保険証記号番号は英数字8桁+数字2桁の10桁で入力してください。')
+                return render(request, '患者保険証変更.html', {'patients': Patient.objects.all()})
+
+            if insurance_number:
+                patient.hokenmei = insurance_number
+
+            if insurance_expiration:
                 new_expiration_date = datetime.strptime(insurance_expiration, '%Y-%m-%d').date()
                 current_expiration_date = patient.hokenexp
 
                 if new_expiration_date <= current_expiration_date:
                     messages.error(request, '新しい有効期限は現在の有効期限より後の日付を入力してください。')
-                    return render(request, '患者保険証変更.html')
+                    return render(request, '患者保険証変更.html', {'patients': Patient.objects.all()})
 
-                # うるう年のうるう日チェック
                 if new_expiration_date.month == 2 and new_expiration_date.day == 29:
-                    # うるう年の2月29日であることを確認
-                    if (new_expiration_date.year % 4 == 0 and new_expiration_date.year % 100 != 0) or (
-                            new_expiration_date.year % 400 == 0):
-                        patient.hokenexp = new_expiration_date
-                    else:
+                    if not (new_expiration_date.year % 4 == 0 and (
+                            new_expiration_date.year % 100 != 0 or new_expiration_date.year % 400 == 0)):
                         messages.error(request, '指定された日付は有効なうるう年の日付ではありません。')
-                        return render(request, '患者保険証変更.html')
-                else:
-                    patient.hokenexp = new_expiration_date
+                        return render(request, '患者保険証変更.html', {'patients': Patient.objects.all()})
+                patient.hokenexp = new_expiration_date
 
-                patient.save()
-                messages.success(request, '保険証情報が正常に更新されました。')
-                return redirect('update_insurance')
-            else:
-                messages.error(request, '患者IDと保険証記号番号が一致しません。')
-                return redirect('update_insurance')
+            patient.save()
+            messages.success(request, '保険証情報が正常に更新されました。')
+            return redirect('update_insurance')
         except Patient.DoesNotExist:
             messages.error(request, '患者が見つかりません。')
         except Exception as e:
             messages.error(request, f'保険証情報の更新に失敗しました: {e}')
 
-    return render(request, '患者保険証変更.html')
+    return render(request, '患者保険証変更.html', {'patients': Patient.objects.all()})
 
 
 def search_expired_insurance(request):
@@ -368,7 +394,8 @@ def search_patients(request):
     elif search_type == 'id':
         patients = Patient.objects.filter(patid__icontains=search_value)
     elif search_type == 'name':
-        patients = Patient.objects.filter(patfname__icontains=search_value) | Patient.objects.filter(patlname__icontains=search_value)
+        patients = Patient.objects.filter(patfname__icontains=search_value) | Patient.objects.filter(
+            patlname__icontains=search_value)
 
     return render(request, '患者検索（全件）.html', {'patients': patients})
 
