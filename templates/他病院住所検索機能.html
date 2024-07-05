@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>他病院住所検索</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 50%;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label, input, button {
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            padding: 10px;
+            background-color: #f9f9f9;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>他病院住所検索</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label for="address">住所:</label>
+        <input type="text" id="address" name="address" required>
+        <button type="submit">検索</button>
+    </form>
+    <ul>
+        {% if tabyouins %}
+            {% for tabyouin in tabyouins %}
+                <li>{{ tabyouin.tabyouinmei }} - {{ tabyouin.tabyouinaddress }} - {{ tabyouin.tabyouintel }}</li>
+            {% endfor %}
+        {% endif %}
+    </ul>
+    <p><a href="{% url 'tabyouin_page' %}">戻る</a></p>
+</div>
+</body>
+</html>

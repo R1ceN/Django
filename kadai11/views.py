@@ -5,7 +5,8 @@ from datetime import datetime
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils import timezone
-from .models import Employee, Patient, Shiiregyosha, Medicine, Treatment
+from .models import Employee, Patient, Shiiregyosha, Medicine, Treatment, Tabyouin
+from functools import wraps
 
 
 def login(request):
@@ -17,9 +18,10 @@ def login(request):
 
         try:
             user = Employee.objects.get(empid=empid)
-            if password == user.emppasswd:  # ハッシュ化を行わずに直接比較
+            if password.strip() == user.emppasswd.strip():  # ハッシュ化を行わずに直接比較
                 request.session['user_id'] = user.empid  # セッションにユーザーIDを保存
                 request.session['is_authenticated'] = True  # セッションに認証状態を保存
+                request.session['user_role'] = user.emprole  # セッションにユーザーの役割を保存
                 if user.emprole == 1:  # 管理者
                     return render(request, '管理者.html')
                 elif user.emprole == 2:  # 受付
@@ -37,10 +39,37 @@ def login(request):
     return render(request, 'login.html')
 
 
+def check_session(request):
+    print("User ID:", request.session.get('user_id'))
+    print("Is Authenticated:", request.session.get('is_authenticated'))
+    print("User Role:", request.session.get('user_role'))
+    return JsonResponse({
+        'user_id': request.session.get('user_id'),
+        'is_authenticated': request.session.get('is_authenticated'),
+        'user_role': request.session.get('user_role')
+    })
+
+
+# デコレータの作成
+def login_required(role=None):
+    def decorator(function):
+        @wraps(function)
+        def wrap(request, *args, **kwargs):
+            if not request.session.get('is_authenticated', False):
+                return redirect('login')
+            if role and str(request.session.get('user_role')) != str(role):
+                return render(request, 'アクセス拒否.html')
+            return function(request, *args, **kwargs)
+        return wrap
+    return decorator
+
+
+@login_required(role='1')
 def admin_page(request):
     return render(request, '管理者.html')
 
 
+@login_required(role='1')
 def register_employee(request):
     if request.method == 'POST':
         empid = request.POST.get('empid')
@@ -67,10 +96,128 @@ def register_employee(request):
     return render(request, '従業員登録.html')
 
 
+@login_required(role='1')
+def tabyouin_page(request):
+    return render(request, '他病院.html')
+
+
+@login_required(role='1')
+def register_tabyouin(request):
+    if request.method == 'POST':
+        tabyouinid = request.POST.get('tabyouinid').strip()
+        tabyouinmei = request.POST.get('tabyouinmei').strip()
+        tabyouinaddress = request.POST.get('tabyouinaddress').strip()
+        tabyouintel = request.POST.get('tabyouintel').strip()
+        tabyouinshihonkin = request.POST.get('tabyouinshihonkin').strip()
+        kyukyu = request.POST.get('kyukyu').strip()
+
+        errors = []
+        tabyouinshihonkin_value = None
+
+        # 全項目が空欄の場合
+        if (not tabyouinid or not tabyouinmei or not tabyouinaddress or not tabyouintel
+                or not tabyouinshihonkin or not kyukyu):
+            errors.append("すべての項目を入力してください。")
+
+        # 重複IDのチェック
+        if Tabyouin.objects.filter(tabyouinid=tabyouinid).exists():
+            errors.append("この他病院IDは既に存在します。別のIDを入力してください。")
+
+        # 電話番号のバリデーション
+        if not re.match(r'^[0-9()-]+$', tabyouintel):
+            errors.append('電話番号には数字、ハイフン、括弧のみを使用してください。')
+
+        # 資本金のバリデーション
+        try:
+            tabyouinshihonkin_value = int(tabyouinshihonkin.replace('￥', '').replace(',', ''))
+            if tabyouinshihonkin_value < 1:
+                errors.append('資本金は1以上の数値を入力してください。')
+        except ValueError:
+            errors.append('資本金には数値、カンマ、円記号のみを使用してください。')
+
+        # 救急対応のバリデーション
+        if kyukyu != '1' and kyukyu != '0':
+            errors.append('救急対応は1（救急対応）または0（他対応）で入力してください。')
+
+        if errors:
+            return render(request, '他病院登録機能.html', {'errors': errors})
+
+        try:
+            Tabyouin.objects.create(
+                tabyouinid=tabyouinid,
+                tabyouinmei=tabyouinmei,
+                tabyouinaddress=tabyouinaddress,
+                tabyouintel=tabyouintel,
+                tabyouinshihonkin=tabyouinshihonkin_value,
+                kyukyu=kyukyu
+            )
+            messages.success(request, '他病院が正常に登録されました')
+            return redirect('tabyouin_list')  # 登録完了テンプレートをレンダリングする代わりにリストページにリダイレクト
+        except Exception as e:
+            errors.append(f'他病院の登録に失敗しました: {str(e)}')
+            return render(request, '他病院登録機能.html', {'errors': errors})
+
+    return render(request, '他病院登録機能.html')
+
+
+@login_required(role='1')
+# 他病院の一覧表示
+def tabyouin_list(request):
+    tabyouins = Tabyouin.objects.all()
+    return render(request, '他病院一覧表示機能.html', {'tabyouins': tabyouins})
+
+
+@login_required(role='1')
+# 他病院の住所検索
+def search_tabyouin_by_address(request):
+    tabyouins = None
+    address_query = ''
+    if request.method == 'POST':
+        address_query = request.POST.get('address', '')
+        if address_query:
+            tabyouins = Tabyouin.objects.filter(tabyouinaddress__icontains=address_query)
+    return render(request, '他病院住所検索機能.html', {'tabyouins': tabyouins, 'query': address_query})
+
+
+@login_required(role='1')
+# 他病院の資本金検索
+def search_tabyouin_by_capital(request):
+    tabyouins = None
+    capital_query = ''
+    if request.method == 'POST':
+        capital_query = request.POST.get('capital', '')
+        if capital_query:
+            try:
+                capital_value = int(capital_query)
+                tabyouins = Tabyouin.objects.filter(tabyouinshihonkin__gte=capital_value)
+            except ValueError:
+                messages.error(request, '資本金は数値を入力してください')
+    return render(request, '他病院資本金検索機能.html', {'tabyouins': tabyouins, 'query': capital_query})
+
+
+@login_required(role='1')
+# 他病院の電話番号変更
+def update_tabyouin_phone(request):
+    if request.method == 'POST':
+        tabyouin_id = request.POST.get('tabyouin_id')
+        new_phone = request.POST.get('phone')
+        try:
+            tabyouin = Tabyouin.objects.get(tabyouinid=tabyouin_id)
+            tabyouin.tabyouintel = new_phone
+            tabyouin.save()
+            messages.success(request, '電話番号が正常に更新されました')
+            return redirect('tabyouin_list')
+        except Tabyouin.DoesNotExist:
+            messages.error(request, '他病院が見つかりませんでした')
+    return render(request, '他病院情報変更機能.html')
+
+
+@login_required(role='1')
 def supplier_menu(request):
     return render(request, '仕入れ.html')
 
 
+@login_required(role='1')
 def update_supplier_phone(request):
     if request.method == 'POST':
         supplier_id = request.POST.get('supplier_id')
@@ -101,6 +248,7 @@ def update_supplier_phone(request):
     return render(request, '電話番号変更.html')
 
 
+@login_required(role='1')
 def search_by_capital(request):
     suppliers = None
     capital_query = ''
@@ -120,7 +268,7 @@ def search_by_capital(request):
     return render(request, '資本金検索.html', {'suppliers': suppliers, 'query': capital_query})
 
 
-
+@login_required(role='1')
 def change_employee_name(request):
     if request.method == 'POST':
         employee_id = request.POST.get('employee_id')
@@ -142,6 +290,7 @@ def change_employee_name(request):
     return render(request, '従業員氏名変更.html')
 
 
+@login_required(role='1')
 def add_supplier(request):
     if request.method == 'POST':
         shiireid = request.POST.get('shiireid').strip()
@@ -204,19 +353,23 @@ def add_supplier(request):
     return render(request, '仕入れ先追加.html')
 
 
+@login_required(role='1')
 def supplier_list(request):
     suppliers = Shiiregyosha.objects.all()
     return render(request, '仕入れ先一覧.html', {'suppliers': suppliers})
 
 
+@login_required(role='2')
 def employee_reception(request):
     return render(request, '従業員受付.html')
 
 
+@login_required(role='3')
 def employee_doctor(request):
     return render(request, '従業員医師.html')
 
 
+@login_required(role='2')
 def change_password(request):
     if not request.session.get('is_authenticated', False):
         return redirect('login')
@@ -248,6 +401,7 @@ def change_password(request):
     return render(request, '従業員情報変更ps.html')
 
 
+@login_required(role='3')
 def change_password1(request):
     if not request.session.get('is_authenticated', False):
         return redirect('login')
@@ -279,6 +433,7 @@ def change_password1(request):
     return render(request, '従業員情報変更ps1.html')
 
 
+@login_required(role='2')
 def register_patient(request):
     if request.method == 'POST':
         patid = request.POST.get('patid')
@@ -309,6 +464,7 @@ def register_patient(request):
     return render(request, '患者登録.html')
 
 
+@login_required(role='2')
 def get_insurance_number(request):
     if request.method == 'GET':
         patient_id = request.GET.get('patientID')
@@ -323,6 +479,7 @@ def get_insurance_number(request):
     return JsonResponse({'error': '無効なリクエストです。'}, status=400)
 
 
+@login_required(role='2')
 def get_patient_ids(request):
     if request.method == 'GET':
         patients = Patient.objects.values_list('patid', flat=True)
@@ -330,6 +487,7 @@ def get_patient_ids(request):
     return JsonResponse({'error': '無効なリクエストです。'}, status=400)
 
 
+@login_required(role='2')
 def update_insurance(request):
     if request.method == 'POST':
         patient_id = request.POST.get('patientID')
@@ -375,6 +533,7 @@ def update_insurance(request):
     return render(request, '患者保険証変更.html', {'patients': Patient.objects.all()})
 
 
+@login_required(role='2')
 def search_expired_insurance(request):
     patients = []
     if request.method == 'POST':
@@ -384,6 +543,7 @@ def search_expired_insurance(request):
     return render(request, '患者検索期限切れ.html', {'patients': patients})
 
 
+@login_required(role='2')
 def search_patients(request):
     search_type = request.GET.get('search_type')
     search_value = request.GET.get('search_value')
@@ -410,6 +570,7 @@ def save_temporary_instructions(request, instructions):
     request.session['temporary_instructions'] = instructions
 
 
+@login_required(role='3')
 def drug_administration_instructions(request):
     medicines = Medicine.objects.all()
     patients = Patient.objects.all()
@@ -454,6 +615,7 @@ def drug_administration_instructions(request):
     })
 
 
+@login_required(role='3')
 def drug_administration_confirm(request):
     temporary_instructions = get_temporary_instructions(request)
     if request.method == 'POST':
@@ -500,6 +662,7 @@ def drug_administration_confirm(request):
     })
 
 
+@login_required(role='3')
 def history_display(request):
     if request.method == 'POST':
         patient_id = request.POST.get('patient_id')

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>他病院一覧表示</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            padding: 10px;
+            background-color: #f9f9f9;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>他病院一覧表示</h1>
+    <ul>
+        {% for tabyouin in tabyouins %}
+            <li>{{ tabyouin.tabyouinmei }} - {{ tabyouin.tabyouinaddress }} - {{ tabyouin.tabyouintel }}</li>
+        {% endfor %}
+    </ul>
+    <p><a href="{% url 'tabyouin_page' %}">戻る</a></p>
+</div>
+</body>
+</html>

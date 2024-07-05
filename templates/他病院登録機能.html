@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>他病院登録</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #007bff;
+            color: #fff;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        main {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            margin-bottom: 15px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .error {
+            color: #ff0000;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>他病院登録</h1>
+</header>
+<main>
+    <form method="post" action="{% url 'register_tabyouin' %}">
+        {% csrf_token %}
+        <div class="error">
+            {% for error in errors %}
+                <p>{{ error }}</p>
+            {% endfor %}
+        </div>
+        <label for="tabyouinid">他病院ID</label>
+        <input type="text" id="tabyouinid" name="tabyouinid" required>
+
+        <label for="tabyouinmei">他病院名</label>
+        <input type="text" id="tabyouinmei" name="tabyouinmei" required>
+
+        <label for="tabyouinaddress">住所</label>
+        <input type="text" id="tabyouinaddress" name="tabyouinaddress" required>
+
+        <label for="tabyouintel">電話番号</label>
+        <input type="text" id="tabyouintel" name="tabyouintel" required>
+
+        <label for="tabyouinshihonkin">資本金</label>
+        <input type="text" id="tabyouinshihonkin" name="tabyouinshihonkin" required>
+
+        <label for="kyukyu">救急対応 (1: 救急対応, 0: 他対応)</label>
+        <input type="text" id="kyukyu" name="kyukyu" required>
+
+        <button type="submit">登録</button>
+    </form>
+</main>
+</body>
+</html>
+

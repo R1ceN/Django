@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>他病院管理</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #007bff;
+            color: #fff;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        main {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>他病院管理メニュー</h1>
+</header>
+<main>
+    <h2><a href="{% url 'register_tabyouin' %}">他病院登録</a></h2>
+    
+    <h2><a href="{% url 'tabyouin_list' %}">他病院一覧表示</a></h2>
+    
+    <h2><a href="{% url 'search_tabyouin_by_address' %}">住所で検索</a></h2>
+    
+    <h2><a href="{% url 'search_tabyouin_by_capital' %}">資本金で検索</a></h2>
+    
+    <h2><a href="{% url 'update_tabyouin_phone' %}">電話番号変更</a></h2>
+    
+    <h2><a href="{% url 'admin_page' %}">戻る</a></h2>
+</main>
+</body>
+</html>
+

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>他病院情報変更</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 50%;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label, input, button {
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>他病院情報変更</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label for="tabyouin_id">他病院ID:</label>
+        <input type="text" id="tabyouin_id" name="tabyouin_id" required>
+        <label for="phone">新しい電話番号:</label>
+        <input type="text" id="phone" name="phone" required>
+        <button type="submit">更新</button>
+    </form>
+    <p><a href="{% url 'tabyouin_page' %}">戻る</a></p>
+</div>
+</body>
+</html>
