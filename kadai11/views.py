@@ -115,8 +115,7 @@ def register_tabyouin(request):
         tabyouinshihonkin_value = None
 
         # 全項目が空欄の場合
-        if (not tabyouinid or not tabyouinmei or not tabyouinaddress or not tabyouintel
-                or not tabyouinshihonkin or not kyukyu):
+        if not (tabyouinid and tabyouinmei and tabyouinaddress and tabyouintel and tabyouinshihonkin and kyukyu):
             errors.append("すべての項目を入力してください。")
 
         # 重複IDのチェック
@@ -136,7 +135,7 @@ def register_tabyouin(request):
             errors.append('資本金には数値、カンマ、円記号のみを使用してください。')
 
         # 救急対応のバリデーション
-        if kyukyu != '1' and kyukyu != '0':
+        if kyukyu not in ['1', '0']:
             errors.append('救急対応は1（救急対応）または0（他対応）で入力してください。')
 
         if errors:

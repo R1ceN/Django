@@ -6,7 +6,7 @@ class Tabyouin(models.Model):
     tabyouinid = models.CharField(max_length=8, primary_key=True)
     tabyouinmei = models.CharField(max_length=64)
     tabyouinaddress = models.CharField(max_length=64)
-    tabyouintel = models.CharField(max_length=13)
+    tabyouintel = models.CharField(max_length=20)
     tabyouinshihonkin = models.IntegerField()
     kyukyu = models.IntegerField()  # 1: 救急対応, それ以外: 非対応
 

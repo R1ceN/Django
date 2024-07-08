@@ -1,57 +1,97 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>他病院情報変更</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
             margin: 0;
             padding: 0;
+            background-color: #f4f4f4;
         }
         .container {
-            width: 50%;
-            margin: 20px auto;
-            background-color: #fff;
+            max-width: 400px;
+            margin: 50px auto;
             padding: 20px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        h1 {
+        h2 {
             text-align: center;
             color: #333;
         }
         form {
-            display: flex;
-            flex-direction: column;
+            margin-top: 20px;
         }
-        label, input, button {
-            margin-bottom: 10px;
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
         }
-        button {
+        input[type="text"] {
+            width: 100%;
             padding: 10px;
-            background-color: #007BFF;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button[type="submit"] {
+            background-color: #007bff;
             color: #fff;
             border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
             cursor: pointer;
         }
-        button:hover {
+        button[type="submit"]:hover {
             background-color: #0056b3;
+        }
+        .error {
+            color: red;
+            margin-bottom: 10px;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .back-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .back-link a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>他病院情報変更</h1>
-    <form method="post">
+    <h2>他病院情報変更</h2>
+    <form method="post" action="{% url 'update_tabyouin_phone' %}">
         {% csrf_token %}
         <label for="tabyouin_id">他病院ID:</label>
         <input type="text" id="tabyouin_id" name="tabyouin_id" required>
+
         <label for="phone">新しい電話番号:</label>
         <input type="text" id="phone" name="phone" required>
+
         <button type="submit">更新</button>
     </form>
-    <p><a href="{% url 'tabyouin_page' %}">戻る</a></p>
+    <div class="back-link">
+        <a href="{% url 'tabyouin_page' %}">戻る</a>
+    </div>
+    
+    {% if errors %}
+        <ul class="error">
+            {% for error in errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 </div>
 </body>
 </html>
+

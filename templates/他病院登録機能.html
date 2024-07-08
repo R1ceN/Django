@@ -7,104 +7,97 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
             margin: 0;
             padding: 0;
+            background-color: #f4f4f4;
         }
 
-        header {
-            background-color: #007bff;
-            color: #fff;
-            text-align: center;
-            padding: 20px 0;
-        }
-
-        h1 {
-            margin: 0;
-            font-size: 24px;
-        }
-
-        main {
-            max-width: 600px;
-            margin: 20px auto;
+        .container {
+            max-width: 400px;
+            margin: 50px auto;
             padding: 20px;
             background-color: #fff;
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
         form {
-            display: flex;
-            flex-direction: column;
+            margin-top: 20px;
         }
 
         label {
+            display: block;
             margin-bottom: 5px;
-            font-weight: bold;
+            color: #666;
         }
 
-        input[type="text"],
-        input[type="number"] {
-            margin-bottom: 15px;
+        input[type="text"], input[type="number"], select {
+            width: 100%;
             padding: 10px;
-            font-size: 16px;
+            margin-bottom: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            box-sizing: border-box;
         }
 
-        button {
-            padding: 10px;
-            font-size: 16px;
+        button[type="submit"] {
             background-color: #007bff;
             color: #fff;
             border: none;
+            padding: 10px 20px;
             border-radius: 4px;
             cursor: pointer;
         }
 
-        button:hover {
+        button[type="submit"]:hover {
             background-color: #0056b3;
         }
 
         .error {
-            color: #ff0000;
-            margin-bottom: 15px;
+            color: red;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
-<header>
-    <h1>他病院登録</h1>
-</header>
 <main>
-    <form method="post" action="{% url 'register_tabyouin' %}">
-        {% csrf_token %}
-        <div class="error">
-            {% for error in errors %}
+    <div class="container">
+        <h2>他病院登録フォーム</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="error">
+                {% for error in errors %}
                 <p>{{ error }}</p>
-            {% endfor %}
-        </div>
-        <label for="tabyouinid">他病院ID</label>
-        <input type="text" id="tabyouinid" name="tabyouinid" required>
-
-        <label for="tabyouinmei">他病院名</label>
-        <input type="text" id="tabyouinmei" name="tabyouinmei" required>
-
-        <label for="tabyouinaddress">住所</label>
-        <input type="text" id="tabyouinaddress" name="tabyouinaddress" required>
-
-        <label for="tabyouintel">電話番号</label>
-        <input type="text" id="tabyouintel" name="tabyouintel" required>
-
-        <label for="tabyouinshihonkin">資本金</label>
-        <input type="text" id="tabyouinshihonkin" name="tabyouinshihonkin" required>
-
-        <label for="kyukyu">救急対応 (1: 救急対応, 0: 他対応)</label>
-        <input type="text" id="kyukyu" name="kyukyu" required>
-
-        <button type="submit">登録</button>
-    </form>
+                {% endfor %}
+            </div>
+            <label for="tabyouinid">他病院ID:</label>
+            <input type="text" id="tabyouinid" name="tabyouinid" required>
+            <label for="tabyouinmei">病院名:</label>
+            <input type="text" id="tabyouinmei" name="tabyouinmei" required>
+            <label for="tabyouinaddress">住所:</label>
+            <input type="text" id="tabyouinaddress" name="tabyouinaddress" required>
+            <label for="tabyouintel">電話番号:</label>
+            <input type="text" id="tabyouintel" name="tabyouintel" required>
+            <label for="tabyouinshihonkin">資本金:</label>
+            <input type="number" id="tabyouinshihonkin" name="tabyouinshihonkin" required>
+            <label for="kyukyu">救急対応:</label>
+            <select id="kyukyu" name="kyukyu" required>
+                <option value="">選択してください</option>
+                <option value="1">対応</option>
+                <option value="0">非対応</option>
+            </select>
+            <button type="submit">登録</button>
+            <h2><a href="/tabyouin_page/">戻る</a></h2>
+        </form>
+    </div>
 </main>
 </body>
 </html>
+
+
 
