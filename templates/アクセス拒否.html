@@ -6,34 +6,46 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
+            background-color: #f8d7da;
+            color: #721c24;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
             text-align: center;
-            padding: 50px;
+            border: 1px solid #f5c6cb;
+            background-color: #f8d7da;
+            padding: 20px;
+            border-radius: 10px;
         }
         h1 {
-            color: #ff0000;
+            margin-top: 0;
         }
         p {
-            font-size: 18px;
+            margin: 10px 0;
         }
         a {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: #fff;
+            color: #0056b3;
             text-decoration: none;
-            border-radius: 5px;
-        }
-        a:hover {
-            background-color: #0056b3;
+            font-weight: bold;
         }
     </style>
+    <script>
+        setTimeout(function() {
+            window.location.href = "/login";
+        }, 5000);
+    </script>
 </head>
 <body>
-    <h1>アクセスが拒否されました</h1>
-    <p>このページにアクセスする権限がありません。</p>
-    <a href="{% url 'login' %}">ログインページに戻る</a>
+    <div class="container">
+        <h1>アクセス拒否</h1>
+        <p>申し訳ありませんが、このページへのアクセス権限がありません。</p>
+        <p>5秒後にログイン画面に戻ります。</p>
+        <p>自動的にリダイレクトされない場合は、<a href="/login">こちらをクリックしてください</a>。</p>
+    </div>
 </body>
 </html>
+

@@ -1,13 +1,17 @@
-from django.contrib import messages
-from django.http import JsonResponse
 import re
 from datetime import datetime
-from django.shortcuts import render, redirect
-from django.urls import reverse
-from django.utils import timezone
-from .models import Employee, Patient, Shiiregyosha, Medicine, Treatment, Tabyouin
 from functools import wraps
 
+from django.contrib import messages
+from django.http import JsonResponse
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
+from django.utils import timezone
+
+from kadai11.models import Appointment, Doctor
+from kadai11.models import Employee, Patient, Shiiregyosha, Medicine, Treatment, Tabyouin
+
+from django.contrib.auth import logout as auth_logout
 
 def login(request):
     if request.method == 'POST':
@@ -43,11 +47,18 @@ def check_session(request):
     print("User ID:", request.session.get('user_id'))
     print("Is Authenticated:", request.session.get('is_authenticated'))
     print("User Role:", request.session.get('user_role'))
+
+    request.session.modified = True
+
     return JsonResponse({
         'user_id': request.session.get('user_id'),
         'is_authenticated': request.session.get('is_authenticated'),
         'user_role': request.session.get('user_role')
     })
+
+def logout_view(request):
+    auth_logout(request)
+    return redirect('login')
 
 
 # デコレータの作成
@@ -60,7 +71,9 @@ def login_required(role=None):
             if role and str(request.session.get('user_role')) != str(role):
                 return render(request, 'アクセス拒否.html')
             return function(request, *args, **kwargs)
+
         return wrap
+
     return decorator
 
 
@@ -179,7 +192,6 @@ def search_tabyouin_by_address(request):
 
 
 @login_required(role='1')
-# 他病院の資本金検索
 def search_tabyouin_by_capital(request):
     tabyouins = None
     capital_query = ''
@@ -187,10 +199,15 @@ def search_tabyouin_by_capital(request):
         capital_query = request.POST.get('capital', '')
         if capital_query:
             try:
-                capital_value = int(capital_query)
+                # 「￥」、「円」、カンマを削除して数値に変換
+                cleaned_query = re.sub(r'[￥¥円,]', '', capital_query)
+                capital_value = int(cleaned_query)
+                if capital_value < 1:
+                    raise ValueError("Capital must be 1 or greater.")
                 tabyouins = Tabyouin.objects.filter(tabyouinshihonkin__gte=capital_value)
             except ValueError:
-                messages.error(request, '資本金は数値を入力してください')
+                tabyouins = []
+                messages.error(request, '資本金は1以上の数値を入力してください。')
     return render(request, '他病院資本金検索機能.html', {'tabyouins': tabyouins, 'query': capital_query})
 
 
@@ -360,12 +377,19 @@ def supplier_list(request):
 
 @login_required(role='2')
 def employee_reception(request):
-    return render(request, '従業員受付.html')
+    if not request.user.is_staff:
+        return redirect('login')
+    appointments = Appointment.objects.all()
+    return render(request, '従業員受付.html', {'appointments': appointments})
 
 
 @login_required(role='3')
 def employee_doctor(request):
-    return render(request, '従業員医師.html')
+    if not request.user.groups.filter(name='Doctors').exists():
+        return redirect('login')
+    doctor = get_object_or_404(Doctor, user=request.user)
+    appointments = Appointment.objects.filter(doctor=doctor, appointment_date__date=timezone.now().date())
+    return render(request, '従業員医師.html', {'appointments': appointments})
 
 
 @login_required(role='2')
